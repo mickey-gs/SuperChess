@@ -1,0 +1,32 @@
+[gd_scene load_steps=5 format=2]
+
+[ext_resource path="res://Square.cs" type="Script" id=1]
+[ext_resource path="res://assets/wood_grain.jpg" type="Texture" id=2]
+[ext_resource path="res://SquareCollision.cs" type="Script" id=3]
+
+[sub_resource type="RectangleShape2D" id=1]
+extents = Vector2( 31.5, 31.5 )
+
+[node name="Square" type="Area2D"]
+script = ExtResource( 1 )
+__meta__ = {
+"_edit_group_": true
+}
+
+[node name="Background" type="TextureRect" parent="."]
+margin_right = 63.0
+margin_bottom = 63.0
+mouse_filter = 2
+texture = ExtResource( 2 )
+expand = true
+
+[node name="Sprite" type="Polygon2D" parent="."]
+position = Vector2( 156.886, -65.1333 )
+scale = Vector2( 1.77143, 2.06667 )
+color = Color( 0, 0, 0, 0.631373 )
+polygon = PoolVector2Array( -88.5645, 31.5161, -53, 31.5161, -53, 62, -88.5645, 62 )
+
+[node name="CollShape" type="CollisionShape2D" parent="."]
+position = Vector2( 31.5, 31.5 )
+shape = SubResource( 1 )
+script = ExtResource( 3 )
