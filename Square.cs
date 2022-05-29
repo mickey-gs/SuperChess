@@ -3,6 +3,8 @@ using System;
 
 public class Square : Node2D {	
 	public Vector2 Pos;
+	public static Color DARK_SQUARE = new Color(0, 0, 0, (float)0.63);
+	public static Color LIGHT_SQUARE = new Color(0, 0, 0, 0);
 	
 	public Square() {
 		this.Pos = new Vector2(0, 0);
@@ -31,6 +33,21 @@ public class Square : Node2D {
 	
 	public void SetPos(Vector2 Pos) {
 		this.Pos = Pos;
+	}
+	
+	public void Highlight() {
+		var sprite = (Polygon2D)GetNode("Sprite");
+		sprite.Color = new Color((float)0.92, 1, 0, (float)1);
+	}
+	
+	public void Clear() {
+		GetNode<Polygon2D>("Sprite").Color = ((Pos.x + Pos.y) % 2 == 0 ? 
+			DARK_SQUARE : LIGHT_SQUARE);
+	}
+	
+	public char GetPieceColour() {
+		var piece = (Piece)GetChildren()[3];
+		return piece.Colour;
 	}
 	
 	public void BestowPiece(Names name, char colour) {
@@ -63,6 +80,9 @@ public class Square : Node2D {
 		var Scene = GD.Load<PackedScene>("res://" + pieceName + ".tscn");
 		var piece = (Piece)Scene.Instance();
 		piece.SetColour(colour);
+		var sprite = piece.GetNode<Sprite>("Sprite");
+		sprite.Scale = new Vector2((float)0.9, (float)0.9);
+		sprite.Position = new Vector2(sprite.Position.x + 1, sprite.Position.y);
 		AddChild(piece);
 	}
 }

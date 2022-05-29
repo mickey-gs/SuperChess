@@ -3,7 +3,7 @@ using System;
 
 public class Piece : Node2D
 {
-	public char colour;
+	public char Colour;
 
 	public virtual string Greet() {
 		return "hello!";

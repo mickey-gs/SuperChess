@@ -14,6 +14,7 @@ __meta__ = {
 }
 
 [node name="Background" type="TextureRect" parent="."]
+visible = false
 margin_right = 63.0
 margin_bottom = 63.0
 mouse_filter = 2

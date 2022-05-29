@@ -8,6 +8,8 @@ public class Board : Node2D
 	
 	public Vector2 ScreenSize;
 	private Square[,] squares = new Square[8,8];
+	private char Turn = 'w';
+	private Square Selected = null;
 //
 //	#pragma warning disable 649
 //	[Export]
@@ -49,7 +51,7 @@ public class Board : Node2D
 				AddChild(squares[i,j]);
 				squares[i,j].Position = 
 					new Vector2((ScreenSize.x / 8) * j, ScreenSize.y - (ScreenSize.y / 8) * (i + 1));
-				if ((i + j) % 2 == 0) {
+				if ((i + j) % 2 != 0) {
 					squares[i,j].GetNode<Polygon2D>("Sprite").Color = LightSquares;
 				}
 				//GD.Print(squares[i,j].GetNode("Sprite"));
@@ -67,16 +69,29 @@ public class Board : Node2D
 		//var sprite = GetNode<Sprite>("Sprite");
 	}
 	
+	private void Clear() {
+		var children = GetChildren();
+		for (int i = 0; i < children.Count; i++) {
+			if (children[i] is Square sq) {
+				sq.Clear();
+			}
+		}
+	}
+	
 	private void Selection(Vector2 position) {
+		Clear();
+		
+		int file = (int)((position.x / 500) * 8);
+		int rank = (int)(((500 - position.y) / 500) * 8);
+			
 		try {
-			int file = (int)((position.x / 500) * 8);
-			int rank = (int)(((500 - position.y) / 500) * 8);
-			GD.Print($"{file}, {rank}" + squares[rank, file].Pos);
+			if (squares[rank, file].GetPieceColour() != Turn)
+				return;
+				
 			var p = (Piece)squares[rank, file].GetChildren()[3];
-			GD.Print(p.Greet());	
+			squares[rank, file].Highlight();
 		}
 		catch (System.IndexOutOfRangeException) {
-			GD.Print("lol");
 		}
 	}
 	
