@@ -90,6 +90,7 @@ public class Board : Node2D
 				
 			var p = (Piece)squares[rank, file].GetChildren()[3];
 			squares[rank, file].Highlight();
+			GD.Print(squares[rank, file].Moves(squares, new Vector2(file, rank)));
 		}
 		catch (System.IndexOutOfRangeException) {
 		}
