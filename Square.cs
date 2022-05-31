@@ -1,6 +1,5 @@
 using Godot;
 using System;
-using System.Collections.Generic;
 
 public class Square : Node2D {	
 	public Vector2 Pos;
@@ -46,18 +45,18 @@ public class Square : Node2D {
 			DARK_SQUARE : LIGHT_SQUARE);
 	}
 	
-	public List<Vector2> Moves(Square[,] board, Vector2 origin) {
+	public char GetPieceColour() {
 		var piece = (Piece)GetChildren()[3];
-		return piece.Moves(board, origin);
+		return piece.Colour;
 	}
 	
-	public char GetPieceColour() {
+	public string GetPieceName() {
 		try {
 			var piece = (Piece)GetChildren()[3];
-			return piece.Colour;	
+			return piece.GetType().ToString();
 		}
 		catch (System.IndexOutOfRangeException e) {
-			return 'n';
+			return "empty";
 		}
 	}
 	
