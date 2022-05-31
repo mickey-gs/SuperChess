@@ -10,7 +10,9 @@ public class Board : Node2D
 	private Square[,] squares;
 	private char Turn = 'w';
 	private Square Selected = null;
-	private string Fen = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR";
+	private string Fen = StandardFEN;
+
+	public const string StandardFEN = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR";
 //
 //	#pragma warning disable 649
 //	[Export]

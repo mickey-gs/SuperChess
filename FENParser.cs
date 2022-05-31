@@ -2,6 +2,12 @@ using Godot;
 using System;
 
 public class FENParser : Node2D {
+	
+//	public override void _Ready() {
+//		var board = Parse("rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR");
+//		GD.Print(board[0,0].GetPieceName() + board[0,0].GetPieceColour());
+//	}
+	
 	public static Square[,] Parse(string fen) {
 		string[] splitFen = fen.Split("/");
 		Square[,] output = new Square[8,8];
@@ -11,11 +17,11 @@ public class FENParser : Node2D {
 				output[i,j] = (Square)scene.Instance();
 			}
 		}
-		for (int i = 0; i < splitFen.Length; i++) {
-			int j = 0;
-			while (j < splitFen[i].Length) {
+		for (int i = 0; i < 8; i++) {
+			int pointer = 0;
+			for (int j = 0; j < splitFen[i].Length; j++) {
 				if (int.TryParse(splitFen[i][j].ToString(), out int jump)) {
-					j += jump;
+					pointer += jump;
 				}
 				else {
 					Names pieceName = Names.King;
@@ -51,8 +57,8 @@ public class FENParser : Node2D {
 					else {
 						col = 'b';
 					}
-					output[i,j].BestowPiece(pieceName, col);
-					j++;
+					output[7 - i,pointer].BestowPiece(pieceName, col);
+					pointer++;
 				}
 			}
 		}
