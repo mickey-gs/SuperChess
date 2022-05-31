@@ -7,9 +7,10 @@ public class Board : Node2D
 	public Color LightSquares = new Color(1,1,1,(float)0.5);
 	
 	public Vector2 ScreenSize;
-	private Square[,] squares = new Square[8,8];
+	private Square[,] squares;
 	private char Turn = 'w';
 	private Square Selected = null;
+	private string Fen = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR";
 //
 //	#pragma warning disable 649
 //	[Export]
@@ -19,34 +20,9 @@ public class Board : Node2D
 	// Called when the node enters the scene tree for the first time.
 	public override void _Ready() {
 		ScreenSize = GetViewportRect().Size;
-		char col = 'w';
-		var scene = GD.Load<PackedScene>("res://Square.tscn");
+		squares = FENParser.Parse(Fen);
 		for (int i = 0; i < 8; i++) {
 			for (int j = 0; j < 8; j++) {
-				squares[i,j] = (Square)scene.Instance();;
-				if (i > 2) {
-					col = 'b';
-				}
-				if (i == 1 || i == 6) {
-					squares[i,j].BestowPiece(Names.Pawn, col);
-				}
-				else if (i == 0 || i == 7) {
-					if (j == 0 || j == 7) {
-						squares[i,j].BestowPiece(Names.Rook, col);
-					}
-					else if (j == 1 || j == 6) {
-						squares[i,j].BestowPiece(Names.Knight, col);
-					}
-					else if (j == 2 || j == 5) {
-						squares[i,j].BestowPiece(Names.Bishop, col);
-					}
-					else if (j == 3) {
-						squares[i,j].BestowPiece(Names.Queen, col);
-					}
-					else if (j == 4) {
-						squares[i,j].BestowPiece(Names.King, col);
-					}
-				}
 				squares[i, j].SetPos(j, i);
 				AddChild(squares[i,j]);
 				squares[i,j].Position = 
@@ -54,7 +30,6 @@ public class Board : Node2D
 				if ((i + j) % 2 != 0) {
 					squares[i,j].GetNode<Polygon2D>("Sprite").Color = LightSquares;
 				}
-				//GD.Print(squares[i,j].GetNode("Sprite"));
 			}
 		}
 	}

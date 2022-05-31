@@ -50,6 +50,16 @@ public class Square : Node2D {
 		return piece.Colour;
 	}
 	
+	public string GetPieceName() {
+		try {
+			var piece = (Piece)GetChildren()[3];
+			return piece.GetType().ToString();
+		}
+		catch (System.IndexOutOfRangeException e) {
+			return "empty";
+		}
+	}
+	
 	public void BestowPiece(Names name, char colour) {
 		string pieceName = null;
 		switch (name) {
