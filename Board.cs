@@ -10,7 +10,7 @@ public class Board : Node2D
 	private Square[,] squares;
 	private char Turn = 'w';
 	private Square Selected = null;
-	private string Fen = StandardFEN;
+	private string Fen = "rnbqkbn1/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR";
 
 	public const string StandardFEN = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR";
 //
@@ -25,15 +25,22 @@ public class Board : Node2D
 		squares = FENParser.Parse(Fen);
 		for (int i = 0; i < 8; i++) {
 			for (int j = 0; j < 8; j++) {
-				squares[i, j].SetPos(j, i);
 				AddChild(squares[i,j]);
-				squares[i,j].Position = 
+				squares[j,i].SetPos(new Vector2(i, j));
+				squares[j,i].Position = 
 					new Vector2((ScreenSize.x / 8) * j, ScreenSize.y - (ScreenSize.y / 8) * (i + 1));
 				if ((i + j) % 2 != 0) {
 					squares[i,j].GetNode<Polygon2D>("Sprite").Color = LightSquares;
 				}
 			}
 		}
+//		for (int i = 0; i < 8; i++) {
+//			string collect = "";
+//			for (int j = 0; j < 8; j++) {
+//				collect += squares[i,j].GetPieceName();	
+//			}
+//			GD.Print(collect);
+//		}
 	}
 
 	// Called every frame. 'delta' is the elapsed time since the previous frame.
@@ -62,11 +69,14 @@ public class Board : Node2D
 		int rank = (int)(((500 - position.y) / 500) * 8);
 			
 		try {
-			if (squares[rank, file].GetPieceColour() != Turn)
+			if (squares[file, rank].GetPieceColour() != Turn)
 				return;
 				
-			var p = (Piece)squares[rank, file].GetChildren()[3];
-			squares[rank, file].Highlight();
+			var p = (Piece)squares[file, rank].GetChildren()[3];
+			squares[file, rank].Highlight();
+			foreach (var dest in p.Moves(squares, new Vector2(file, rank))) {
+				GD.Print(dest);
+			}
 		}
 		catch (System.IndexOutOfRangeException) {
 		}

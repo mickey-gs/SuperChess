@@ -57,7 +57,7 @@ public class FENParser : Node2D {
 					else {
 						col = 'b';
 					}
-					output[7 - i,pointer].BestowPiece(pieceName, col);
+					output[pointer,7 - i].BestowPiece(pieceName, col);
 					pointer++;
 				}
 			}
