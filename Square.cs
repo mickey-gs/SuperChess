@@ -46,8 +46,23 @@ public class Square : Node2D {
 	}
 	
 	public char GetPieceColour() {
-		var piece = (Piece)GetChildren()[3];
-		return piece.Colour;
+		try {
+			var piece = (Piece)GetChildren()[3];
+			return piece.Colour;
+		}
+		catch (System.IndexOutOfRangeException e) {
+			return 'n';
+		}
+	}
+	
+	public string GetPieceName() {
+		try {
+			var piece = (Piece)GetChildren()[3];
+			return piece.GetType().ToString();
+		}
+		catch (System.IndexOutOfRangeException e) {
+			return "empty";
+		}
 	}
 	
 	public string GetPieceName() {
