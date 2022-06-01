@@ -19,14 +19,16 @@ public class Piece : Node2D
 	
 	protected virtual List<Vector2> GenMoves(Square[,] board, Vector2 origin, 
 		Vector2 dir, List<Vector2> squares) {
-			Vector2 dest = new Vector2(origin.x + dir.x, origin.y + dir.y);
+		Vector2 dest = new Vector2(origin.x + dir.x, origin.y + dir.y);
 		try {
 			if (board[(int)dest.x, (int)dest.y].GetPieceColour() != Colour) {
 				squares.Add(dest);
-				if (board[(int)dest.x, (int)dest.y].GetPieceColour() != 'n')
+				if (board[(int)dest.x, (int)dest.y].GetPieceColour() == 'n') {
 					return GenMoves(board, dest, dir, squares);
-				else
+				}
+				else {
 					return squares;
+				}
 			}
 			else {
 				return squares;

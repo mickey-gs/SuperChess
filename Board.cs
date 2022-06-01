@@ -10,7 +10,7 @@ public class Board : Node2D
 	private Square[,] squares;
 	private char Turn = 'w';
 	private Square Selected = null;
-	private string Fen = "rnbqkbn1/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR";
+	private string Fen = "N6r/8/8/6K1/3Q3r/1P1P2PP/P2N4/7b";
 
 	public const string StandardFEN = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR";
 //
@@ -74,8 +74,9 @@ public class Board : Node2D
 				
 			var p = (Piece)squares[file, rank].GetChildren()[3];
 			squares[file, rank].Highlight();
+			GD.Print(p.Moves(squares, new Vector2(file, rank)).Count);
 			foreach (var dest in p.Moves(squares, new Vector2(file, rank))) {
-				GD.Print(dest);
+				squares[(int)dest.x, (int)dest.y].Highlight();
 			}
 		}
 		catch (System.IndexOutOfRangeException) {
