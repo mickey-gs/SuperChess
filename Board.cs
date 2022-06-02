@@ -26,7 +26,7 @@ public class Board : Node2D
 		for (int i = 0; i < 8; i++) {
 			for (int j = 0; j < 8; j++) {
 				AddChild(squares[i,j]);
-				squares[j,i].SetPos(new Vector2(i, j));
+				squares[j,i].SetPos(new Vector2(j, i));
 				squares[j,i].Position = 
 					new Vector2((ScreenSize.x / 8) * j, ScreenSize.y - (ScreenSize.y / 8) * (i + 1));
 				if ((i + j) % 2 != 0) {
@@ -69,17 +69,48 @@ public class Board : Node2D
 		int rank = (int)(((500 - position.y) / 500) * 8);
 			
 		try {
-			if (squares[file, rank].GetPieceColour() != Turn)
-				return;
+			if (Selected == null) {
+				if (squares[file, rank].GetPieceColour() != Turn)
+					return;
 				
-			var p = (Piece)squares[file, rank].GetChildren()[3];
-			squares[file, rank].Highlight();
-			GD.Print(p.Moves(squares, new Vector2(file, rank)).Count);
-			foreach (var dest in p.Moves(squares, new Vector2(file, rank))) {
-				squares[(int)dest.x, (int)dest.y].Highlight();
+				Selected = squares[file, rank];
+				var p = (Piece)squares[file, rank].GetChildren()[3];
+				squares[file, rank].Highlight();
+				foreach (var dest in p.Moves(squares, new Vector2(file, rank))) {
+					squares[(int)dest.x, (int)dest.y].Highlight();
+					GD.Print(dest);
+				}
 			}
+			else {
+				if (squares[file, rank].GetPieceColour() == Turn) {
+					Selected = squares[file, rank];
+					var p = (Piece)squares[file, rank].GetChildren()[3];
+					squares[file, rank].Highlight();
+					foreach (var dest in p.Moves(squares, new Vector2(file, rank))) {
+						squares[(int)dest.x, (int)dest.y].Highlight();
+					}
+				}
+				else {
+					var p = (Piece)Selected.GetChildren()[3];
+					if (p.Moves(squares, Selected.Pos).Contains(new Vector2(file, rank))) {
+						squares[file, rank].BestowPiece(Selected.GetPieceName(), Turn);
+						Turn = (Turn == 'w' ? 'b' : 'w');
+						Selected.RemovePiece();
+					}
+//					else {
+//						foreach (var move in p.Moves(squares, Selected.Pos)) {
+//							GD.Print(move);
+//						}
+//						GD.Print($"kurwa {new Vector2(file, rank)}");
+////						GD.Print(Selected.Pos);
+//					}
+				}
+			}
+			
+			
 		}
 		catch (System.IndexOutOfRangeException) {
+			GD.Print("whoops");
 		}
 	}
 	
