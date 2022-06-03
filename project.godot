@@ -11,14 +11,13 @@ config_version=4
 [application]
 
 config/name="SuperChess"
-run/main_scene="res://Board.tscn"
+run/main_scene="res://GameSpace.tscn"
 config/icon="res://icon.png"
 
 [display]
 
 window/size/width=504
 window/size/height=504
-window/size/resizable=false
 window/stretch/mode="2d"
 window/stretch/aspect="keep"
 

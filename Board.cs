@@ -11,7 +11,7 @@ public class Board : Node2D
 	private Square[,] squares;
 	private char Turn = 'w';
 	private Square Selected = null;
-	private string Fen = "N6r/8/8/6K1/3Q3r/1P1P2PP/P2N4/6bk";
+	private string Fen = "N6r/8/8/6K1/3Q3r/1P1P2PP/P2N4/7k";
 
 	public const string StandardFEN = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR";
 //
@@ -22,14 +22,15 @@ public class Board : Node2D
 
 	// Called when the node enters the scene tree for the first time.
 	public override void _Ready() {
-		ScreenSize = GetViewportRect().Size;
+		var parent = (GameSpace)GetParent();
+		float width = parent.BoardWidth();
 		squares = FENParser.Parse(Fen);
 		for (int i = 0; i < 8; i++) {
 			for (int j = 0; j < 8; j++) {
 				AddChild(squares[i,j]);
 				squares[j,i].SetPos(new Vector2(j, i));
 				squares[j,i].Position = 
-					new Vector2((ScreenSize.x / 8) * j, ScreenSize.y - (ScreenSize.y / 8) * (i + 1));
+					new Vector2((width / 8) * j, width - (width / 8) * (i + 1));
 				if ((i + j) % 2 != 0) {
 					squares[i,j].GetNode<Polygon2D>("Sprite").Color = LightSquares;
 				}
@@ -59,6 +60,23 @@ public class Board : Node2D
 		return allAttacks;
 	}
 	
+	private static List<Vector2> AllMoves(Square[,] board, char col) {
+		List<Vector2> allMoves = new List<Vector2> {};
+		for (int i = 0; i < 8; i++) {
+			for (int j = 0; j < 8; j++) {
+				if (board[i, j].GetPieceColour() == col) {
+					try {
+						var p = (Piece)board[i, j].GetChildren()[3];
+						allMoves.AddRange(p.LegalMoves(board, board[i, j].Pos));
+					}
+					catch (System.IndexOutOfRangeException) {}
+				}
+			}
+		}
+		
+		return allMoves;
+	}
+	
 	public static bool LookForChecks(Square[,] board, char col) {
 		Square kingSquare = null;
 		for (int i = 0; i < 8; i++) {
@@ -86,7 +104,7 @@ public class Board : Node2D
 		int file = (int)((position.x / 500) * 8);
 		int rank = (int)(((500 - position.y) / 500) * 8);
 			
-		try {
+		try {	
 			if (Selected == null) {
 				if (squares[file, rank].GetPieceColour() != Turn)
 					return;
@@ -114,12 +132,21 @@ public class Board : Node2D
 						Turn = (Turn == 'w' ? 'b' : 'w');
 						Selected.RemovePiece();
 					}
+					
+					if (AllMoves(squares, Turn).Count == 0) {
+						Checkmate(Turn == 'w' ? 'b' : 'w');
+					}
 				}
 			}
 			
 			
 		}
 		catch (System.IndexOutOfRangeException) {}
+	}
+	
+	private void Checkmate(char col) {
+		string winner = (col == 'w' ? "White" : "Black");
+		GD.Print($"Checkmate! {winner} wins!");
 	}
 	
 	private void _on_Square_input_event(object viewport, object @event, int shape_idx)
