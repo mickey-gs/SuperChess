@@ -1,5 +1,6 @@
 using Godot;
 using System;
+using System.Collections.Generic;
 
 public class Board : Node2D
 {
@@ -10,7 +11,7 @@ public class Board : Node2D
 	private Square[,] squares;
 	private char Turn = 'w';
 	private Square Selected = null;
-	private string Fen = "N6r/8/8/6K1/3Q3r/1P1P2PP/P2N4/7b";
+	private string Fen = "N6r/8/8/6K1/3Q3r/1P1P2PP/P2N4/6bk";
 
 	public const string StandardFEN = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR";
 //
@@ -34,23 +35,40 @@ public class Board : Node2D
 				}
 			}
 		}
-//		for (int i = 0; i < 8; i++) {
-//			string collect = "";
-//			for (int j = 0; j < 8; j++) {
-//				collect += squares[i,j].GetPieceName();	
-//			}
-//			GD.Print(collect);
-//		}
 	}
 
 	// Called every frame. 'delta' is the elapsed time since the previous frame.
 	public override void _Process(float delta)
 	{
 	}
-
-	private void setSize() {
-		ScreenSize = GetViewportRect().Size;
-		//var sprite = GetNode<Sprite>("Sprite");
+	
+	private static List<Vector2> AllAttacks(Square[,] board, char col) {
+		List<Vector2> allAttacks = new List<Vector2> {};
+		for (int i = 0; i < 8; i++) {
+			for (int j = 0; j < 8; j++) {
+				if (board[i, j].GetPieceColour() == col) {
+					try {
+						var p = (Piece)board[i, j].GetChildren()[3];
+						allAttacks.AddRange(p.Moves(board, board[i, j].Pos));
+					}
+					catch (System.IndexOutOfRangeException) {}
+				}
+			}
+		}
+		
+		return allAttacks;
+	}
+	
+	public static bool LookForChecks(Square[,] board, char col) {
+		Square kingSquare = null;
+		for (int i = 0; i < 8; i++) {
+			for (int j = 0; j < 8; j++) {
+				if (board[i,j].GetPieceName() == "King" && board[i,j].GetPieceColour() == col)
+					kingSquare = board[i,j];
+			}
+		}
+		char enemyCol = (col == 'w' ? 'b' : 'w');
+		return AllAttacks(board, enemyCol).Contains(kingSquare.Pos);
 	}
 	
 	private void Clear() {
@@ -76,9 +94,8 @@ public class Board : Node2D
 				Selected = squares[file, rank];
 				var p = (Piece)squares[file, rank].GetChildren()[3];
 				squares[file, rank].Highlight();
-				foreach (var dest in p.Moves(squares, new Vector2(file, rank))) {
+				foreach (var dest in p.LegalMoves(squares, new Vector2(file, rank))) {
 					squares[(int)dest.x, (int)dest.y].Highlight();
-					GD.Print(dest);
 				}
 			}
 			else {
@@ -86,32 +103,23 @@ public class Board : Node2D
 					Selected = squares[file, rank];
 					var p = (Piece)squares[file, rank].GetChildren()[3];
 					squares[file, rank].Highlight();
-					foreach (var dest in p.Moves(squares, new Vector2(file, rank))) {
+					foreach (var dest in p.LegalMoves(squares, new Vector2(file, rank))) {
 						squares[(int)dest.x, (int)dest.y].Highlight();
 					}
 				}
 				else {
 					var p = (Piece)Selected.GetChildren()[3];
-					if (p.Moves(squares, Selected.Pos).Contains(new Vector2(file, rank))) {
+					if (p.LegalMoves(squares, Selected.Pos).Contains(new Vector2(file, rank))) {
 						squares[file, rank].BestowPiece(Selected.GetPieceName(), Turn);
 						Turn = (Turn == 'w' ? 'b' : 'w');
 						Selected.RemovePiece();
 					}
-//					else {
-//						foreach (var move in p.Moves(squares, Selected.Pos)) {
-//							GD.Print(move);
-//						}
-//						GD.Print($"kurwa {new Vector2(file, rank)}");
-////						GD.Print(Selected.Pos);
-//					}
 				}
 			}
 			
 			
 		}
-		catch (System.IndexOutOfRangeException) {
-			GD.Print("whoops");
-		}
+		catch (System.IndexOutOfRangeException) {}
 	}
 	
 	private void _on_Square_input_event(object viewport, object @event, int shape_idx)
