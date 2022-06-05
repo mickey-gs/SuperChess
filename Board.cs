@@ -11,7 +11,8 @@ public class Board : Node2D
 	private Square[,] squares;
 	private char Turn = 'w';
 	private Square Selected = null;
-	private string Fen = "N6r/8/8/6K1/3Q3r/1P1P2PP/P2N4/7k";
+	private string Fen = "k7/8/7P/8/8/8/8/5RK";
+	private int PromotionFile = 9;
 
 	public const string StandardFEN = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR";
 //
@@ -134,7 +135,25 @@ public class Board : Node2D
 					}
 					
 					if (AllMoves(squares, Turn).Count == 0) {
-						Checkmate(Turn == 'w' ? 'b' : 'w');
+						if (LookForChecks(squares, Turn)) 
+							Checkmate(Turn == 'w' ? 'b' : 'w');
+						else 
+							Stalemate(Turn);
+					}
+					
+					for (int i = 0; i < 8; i++) {
+						if (squares[i,7].GetPieceName() == "Pawn") {
+							squares[i,7].RemovePiece();
+							PromotionFile = i;
+							var scene = GD.Load<PackedScene>("res://WhitePromotion.tscn");
+							var controls = (WhitePromotion)scene.Instance();
+							var parent = (GameSpace)GetParent();
+							float width = parent.BoardWidth() / 8;
+							controls.RectPosition = 
+								new Vector2(width * i, 0);
+							controls.RectScale = new Vector2(0.9F, 0.9F);
+							AddChild(controls);
+						}
 					}
 				}
 			}
@@ -147,6 +166,18 @@ public class Board : Node2D
 	private void Checkmate(char col) {
 		string winner = (col == 'w' ? "White" : "Black");
 		GD.Print($"Checkmate! {winner} wins!");
+	}
+	
+	private void Stalemate(char col) {
+		string stuck = (col == 'w' ? "White" : "Black");
+		GD.Print($"Stalemate! {stuck} has no legal moves and so the game is a draw.");
+	}
+	
+	private void OnWhitePromotion(string pieceName) {
+		squares[PromotionFile,7].RemovePiece();
+		squares[PromotionFile,7].BestowPiece(pieceName, 'w');
+		var menu = (VBoxContainer)GetChildren()[64];
+		((Node)GetChildren()[64]).QueueFree();
 	}
 	
 	private void _on_Square_input_event(object viewport, object @event, int shape_idx)
