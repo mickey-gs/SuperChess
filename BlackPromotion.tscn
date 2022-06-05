@@ -1,0 +1,40 @@
+[gd_scene load_steps=6 format=2]
+
+[ext_resource path="res://BlackPromotion.cs" type="Script" id=1]
+[ext_resource path="res://assets/bQ.png" type="Texture" id=2]
+[ext_resource path="res://assets/bB.png" type="Texture" id=3]
+[ext_resource path="res://assets/bR.png" type="Texture" id=4]
+[ext_resource path="res://assets/bN.png" type="Texture" id=5]
+
+[node name="BlackPromotion" type="VBoxContainer"]
+anchor_right = 1.0
+anchor_bottom = 1.0
+script = ExtResource( 1 )
+
+[node name="QueenBttn" type="TextureButton" parent="."]
+margin_right = 504.0
+margin_bottom = 68.0
+texture_normal = ExtResource( 2 )
+
+[node name="RookBttn" type="TextureButton" parent="."]
+margin_top = 72.0
+margin_right = 504.0
+margin_bottom = 140.0
+texture_normal = ExtResource( 4 )
+
+[node name="BishopBttn" type="TextureButton" parent="."]
+margin_top = 144.0
+margin_right = 504.0
+margin_bottom = 212.0
+texture_normal = ExtResource( 3 )
+
+[node name="KnightBttn" type="TextureButton" parent="."]
+margin_top = 216.0
+margin_right = 504.0
+margin_bottom = 284.0
+texture_normal = ExtResource( 5 )
+
+[connection signal="pressed" from="QueenBttn" to="." method="_on_QueenBttn_pressed"]
+[connection signal="pressed" from="RookBttn" to="." method="_on_RookBttn_pressed"]
+[connection signal="pressed" from="BishopBttn" to="." method="_on_BishopBttn_pressed"]
+[connection signal="pressed" from="KnightBttn" to="." method="_on_KnightBttn_pressed"]

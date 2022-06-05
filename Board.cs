@@ -11,7 +11,7 @@ public class Board : Node2D
 	private Square[,] squares;
 	private char Turn = 'w';
 	private Square Selected = null;
-	private string Fen = "k7/8/7P/8/8/8/8/5RK";
+	private string Fen = "7K/k5P1/8/8/8/8/7p/8";
 	private int PromotionFile = 9;
 
 	public const string StandardFEN = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR";
@@ -154,6 +154,18 @@ public class Board : Node2D
 							controls.RectScale = new Vector2(0.9F, 0.9F);
 							AddChild(controls);
 						}
+						else if (squares[i,0].GetPieceName() == "Pawn") {
+							squares[i,0].RemovePiece();
+							PromotionFile = i;
+							var scene = GD.Load<PackedScene>("res://BlackPromotion.tscn");
+							var controls = (BlackPromotion)scene.Instance();
+							var parent = (GameSpace)GetParent();
+							float width = parent.BoardWidth() / 8;
+							controls.RectPosition = 
+								new Vector2(width * i, width * 4);
+							controls.RectScale = new Vector2(0.9F, 0.9F);
+							AddChild(controls);
+						}
 					}
 				}
 			}
@@ -176,6 +188,13 @@ public class Board : Node2D
 	private void OnWhitePromotion(string pieceName) {
 		squares[PromotionFile,7].RemovePiece();
 		squares[PromotionFile,7].BestowPiece(pieceName, 'w');
+		var menu = (VBoxContainer)GetChildren()[64];
+		((Node)GetChildren()[64]).QueueFree();
+	}
+	
+	private void OnBlackPromotion(string pieceName) {
+		squares[PromotionFile,0].RemovePiece();
+		squares[PromotionFile,0].BestowPiece(pieceName, 'b');
 		var menu = (VBoxContainer)GetChildren()[64];
 		((Node)GetChildren()[64]).QueueFree();
 	}
