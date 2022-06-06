@@ -9,9 +9,10 @@ public class Board : Node2D
 	
 	public Vector2 ScreenSize;
 	private Square[,] squares;
+	private static Vector2 EnPassantSq = new Vector2(-1, -1);
 	private char Turn = 'w';
 	private Square Selected = null;
-	private string Fen = "7K/k5P1/8/8/8/8/7p/8";
+	private string Fen = StandardFEN;
 	private int PromotionFile = 9;
 
 	public const string StandardFEN = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR";
@@ -51,7 +52,7 @@ public class Board : Node2D
 				if (board[i, j].GetPieceColour() == col) {
 					try {
 						var p = (Piece)board[i, j].GetChildren()[3];
-						allAttacks.AddRange(p.Moves(board, board[i, j].Pos));
+						allAttacks.AddRange(p.Moves(board, board[i, j].Pos, EnPassantSq));
 					}
 					catch (System.IndexOutOfRangeException) {}
 				}
@@ -68,7 +69,7 @@ public class Board : Node2D
 				if (board[i, j].GetPieceColour() == col) {
 					try {
 						var p = (Piece)board[i, j].GetChildren()[3];
-						allMoves.AddRange(p.LegalMoves(board, board[i, j].Pos));
+						allMoves.AddRange(p.LegalMoves(board, board[i, j].Pos, EnPassantSq));
 					}
 					catch (System.IndexOutOfRangeException) {}
 				}
@@ -113,7 +114,7 @@ public class Board : Node2D
 				Selected = squares[file, rank];
 				var p = (Piece)squares[file, rank].GetChildren()[3];
 				squares[file, rank].Highlight();
-				foreach (var dest in p.LegalMoves(squares, new Vector2(file, rank))) {
+				foreach (var dest in p.LegalMoves(squares, new Vector2(file, rank), EnPassantSq)) {
 					squares[(int)dest.x, (int)dest.y].Highlight();
 				}
 			}
@@ -122,14 +123,21 @@ public class Board : Node2D
 					Selected = squares[file, rank];
 					var p = (Piece)squares[file, rank].GetChildren()[3];
 					squares[file, rank].Highlight();
-					foreach (var dest in p.LegalMoves(squares, new Vector2(file, rank))) {
+					foreach (var dest in p.LegalMoves(squares, new Vector2(file, rank), EnPassantSq)) {
 						squares[(int)dest.x, (int)dest.y].Highlight();
 					}
 				}
 				else {
 					var p = (Piece)Selected.GetChildren()[3];
-					if (p.LegalMoves(squares, Selected.Pos).Contains(new Vector2(file, rank))) {
+					if (p.LegalMoves(squares, Selected.Pos, EnPassantSq).Contains(new Vector2(file, rank))) {
+						if (file == (int)EnPassantSq.x && rank == (int)EnPassantSq.y
+							&& Selected.GetPieceName() == "Pawn") {
+							squares[file, rank + (Turn == 'w' ? -1 : 1)].RemovePiece();
+						}
+						EnPassantSq = new Vector2(-1, -1);
 						squares[file, rank].BestowPiece(Selected.GetPieceName(), Turn);
+						if (Selected.GetPieceName() == "Pawn" && Math.Abs(Selected.Pos.y - rank) > 1)
+							EnPassantSq = new Vector2(file, rank + (Turn == 'w' ? -1 : 1));
 						Turn = (Turn == 'w' ? 'b' : 'w');
 						Selected.RemovePiece();
 					}

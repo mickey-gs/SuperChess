@@ -17,8 +17,8 @@ public class Piece : Node2D
 		return new List<Vector2> { new Vector2(origin.x + 1, origin.y + 2) };
 	}
 	
-	public List<Vector2> LegalMoves(Square[,] board, Vector2 origin) {
-		var allDests = Moves(board, origin);
+	public List<Vector2> LegalMoves(Square[,] board, Vector2 origin, Vector2 enPassant) {
+		var allDests = Moves(board, origin, enPassant);
 		for (int i = 0; i < allDests.Count; i++) {
 			string originPieceName = board[(int)origin.x,(int)origin.y].GetPieceName();
 			char originCol = board[(int)origin.x,(int)origin.y].GetPieceColour();
@@ -38,6 +38,10 @@ public class Piece : Node2D
 		
 		allDests.RemoveAll(sq => (int)sq.x == -1);
 		return allDests;
+	}
+	
+	public virtual List<Vector2> Moves(Square[,] board, Vector2 origin, Vector2 enPassant) {
+		return Moves(board, origin);
 	}
 	
 	protected virtual List<Vector2> GenMoves(Square[,] board, Vector2 origin, 

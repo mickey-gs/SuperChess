@@ -13,7 +13,7 @@ public class Pawn : Piece {
 		sprite.SetTexture(GD.Load<Texture>("./assets/" + col + "p.png"));
 	}
 	
-	public override List<Vector2> Moves(Square[,] board, Vector2 origin) {
+	public override List<Vector2> Moves(Square[,] board, Vector2 origin, Vector2 enPassant) {
 		List<Vector2> moves = new List<Vector2> {};
 		int dir = (Colour == 'w' ? 1 : -1);
 		char targetCol = 'a';
@@ -34,14 +34,16 @@ public class Pawn : Piece {
 		
 		try {
 			targetCol = board[(int)origin.x + 1, (int)origin.y + dir * 1].GetPieceColour();
-			if (targetCol != 'n' && targetCol != Colour) 
-				moves.Add(new Vector2((int)origin.x + 1, (int)origin.y + dir * 1));
+			if ((targetCol != 'n' && targetCol != Colour) || 
+				((int)origin.x + 1 == (int)enPassant.x && (int)origin.y + dir == (int)enPassant.y)) 
+				moves.Add(new Vector2((int)origin.x + 1, (int)origin.y + dir));
 		}
 		catch (System.IndexOutOfRangeException) {}
 		
 		try {
 			targetCol = board[(int)origin.x - 1, (int)origin.y + dir * 1].GetPieceColour();
-			if (targetCol != 'n' && targetCol != Colour) 
+			if ((targetCol != 'n' && targetCol != Colour) ||
+				((int)origin.x - 1 == (int)enPassant.x && (int) origin.y + dir == (int)enPassant.y)) 
 				moves.Add(new Vector2((int)origin.x - 1, (int)origin.y + dir * 1));
 		}
 		catch (System.IndexOutOfRangeException) {}
