@@ -44,6 +44,10 @@ public class Piece : Node2D
 		return Moves(board, origin);
 	}
 	
+	public virtual List<Vector2> Moves(Square[,] squares, Vector2 origin, Board board) {
+		return Moves(squares, origin, Board.EnPassantSq);
+	}
+	
 	protected virtual List<Vector2> GenMoves(Square[,] board, Vector2 origin, 
 		Vector2 dir, List<Vector2> squares) {
 		Vector2 dest = new Vector2(origin.x + dir.x, origin.y + dir.y);
