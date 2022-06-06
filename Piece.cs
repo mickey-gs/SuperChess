@@ -26,7 +26,7 @@ public class Piece : Node2D
 			char destCol = board[(int)allDests[i].x,(int)allDests[i].y].GetPieceColour();
 			board[(int)allDests[i].x,(int)allDests[i].y].BestowPiece(originPieceName, originCol);
 			board[(int)origin.x,(int)origin.y].RemovePiece();
-			bool illegal = Board.LookForChecks(board, Colour);
+			bool illegal = (new Board(board)).LookForChecks(Colour);
 			board[(int)allDests[i].x,(int)allDests[i].y].RemovePiece();
 			if (destCol != 'n') {
 				board[(int)allDests[i].x,(int)allDests[i].y].BestowPiece(destPieceName, destCol);

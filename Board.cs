@@ -17,13 +17,23 @@ public class Board : Node2D
 	private bool Active = true;
 
 	public const string StandardFEN = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR";
-//
-//	#pragma warning disable 649
-//	[Export]
-//	public PackedScene PieceScene;
-//	#pragma warning restore 649
+	
+	public Board() {}
+	
+	public Board(Square[,] board) {
+		squares = new Square[8,8];
+		var scene = GD.Load<PackedScene>("res://Square.tscn");
+		for (int i = 0; i < 8; i++) {
+			for (int j = 0; j < 8; j++) {
+				squares[i,j] = (Square)scene.Instance();
+				if (board[i,j].GetPieceColour() != 'n')
+					squares[i,j].BestowPiece(board[i,j].GetPieceName(), board[i,j].GetPieceColour());
 
-	// Called when the node enters the scene tree for the first time.
+				squares[i,j].SetPos(new Vector2(i, j));
+			}
+		}
+	}
+
 	public override void _Ready() {
 		var parent = (GameSpace)GetParent();
 		float width = parent.BoardWidth();
@@ -40,13 +50,8 @@ public class Board : Node2D
 			}
 		}
 	}
-
-	// Called every frame. 'delta' is the elapsed time since the previous frame.
-	public override void _Process(float delta)
-	{
-	}
 	
-	private static List<Vector2> AllAttacks(Square[,] board, char col) {
+	private List<Vector2> AllAttacks(Square[,] board, char col) {
 		List<Vector2> allAttacks = new List<Vector2> {};
 		for (int i = 0; i < 8; i++) {
 			for (int j = 0; j < 8; j++) {
@@ -63,7 +68,7 @@ public class Board : Node2D
 		return allAttacks;
 	}
 	
-	private static List<Vector2> AllMoves(Square[,] board, char col) {
+	private List<Vector2> AllMoves(Square[,] board, char col) {
 		List<Vector2> allMoves = new List<Vector2> {};
 		for (int i = 0; i < 8; i++) {
 			for (int j = 0; j < 8; j++) {
@@ -80,16 +85,40 @@ public class Board : Node2D
 		return allMoves;
 	}
 	
-	public static bool LookForChecks(Square[,] board, char col) {
+	private bool LookForStalemate(char col) {
+		for (int i = 0; i < 8; i++) {
+			for (int j = 0; j < 8; j++) {
+				if (squares[i, j].GetPieceColour() == col) {
+					try {
+						var p = (Piece)squares[i, j].GetChildren()[3];
+						if (p.LegalMoves(squares, squares[i, j].Pos, EnPassantSq).Count == 0)
+							return false;
+					}
+					catch (System.IndexOutOfRangeException) {}
+				}
+			}
+		}
+		
+		return true;
+	}
+	
+	public bool LookForChecks(char col) {
 		Square kingSquare = null;
 		for (int i = 0; i < 8; i++) {
 			for (int j = 0; j < 8; j++) {
-				if (board[i,j].GetPieceName() == "King" && board[i,j].GetPieceColour() == col)
-					kingSquare = board[i,j];
+				if (squares[i,j].GetPieceName() == "King" && squares[i,j].GetPieceColour() == col)
+					kingSquare = squares[i,j];
 			}
 		}
 		char enemyCol = (col == 'w' ? 'b' : 'w');
-		return AllAttacks(board, enemyCol).Contains(kingSquare.Pos);
+		for (int i = 0; i < 8; i++) {
+			for (int j = 0; j < 8; j++) {
+				if (squares[i,j].GetPieceColour() != 'n' && 
+					((Piece)squares[i,j].GetChildren()[3]).Moves(squares, squares[i,j].Pos, EnPassantSq).Contains(kingSquare.Pos))
+					return true;
+			}
+		}
+		return false;
 	}
 	
 	private void Clear() {
@@ -197,12 +226,10 @@ public class Board : Node2D
 	}
 	
 	private void CheckForEnd() {
-		if (AllMoves(squares, Turn).Count == 0) {
-			if (LookForChecks(squares, Turn)) 
-				Checkmate(Turn == 'w' ? 'b' : 'w');
-			else 
+		if (LookForChecks(Turn) && AllMoves(squares, Turn).Count == 0)
+			Checkmate(Turn == 'w' ? 'b' : 'w');
+		else if (LookForStalemate(Turn))
 				Stalemate(Turn);
-		}
 	}
 	
 	private void Checkmate(char col) {
