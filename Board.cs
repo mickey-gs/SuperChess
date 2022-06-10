@@ -85,16 +85,18 @@ public class Board : Node2D
 		return allMoves;
 	}
 	
-	private bool LookForStalemate(char col) {
+	private bool LookForMate(char col) {
 		for (int i = 0; i < 8; i++) {
 			for (int j = 0; j < 8; j++) {
 				if (squares[i, j].GetPieceColour() == col) {
 					try {
 						var p = (Piece)squares[i, j].GetChildren()[3];
-						if (p.LegalMoves(squares, squares[i, j].Pos, EnPassantSq).Count == 0)
+						if (p.LegalMoves(squares, squares[i, j].Pos, EnPassantSq).Count != 0)
 							return false;
 					}
-					catch (System.IndexOutOfRangeException) {}
+					catch (System.IndexOutOfRangeException) {
+						continue;
+					}
 				}
 			}
 		}
@@ -226,10 +228,12 @@ public class Board : Node2D
 	}
 	
 	private void CheckForEnd() {
-		if (LookForChecks(Turn) && AllMoves(squares, Turn).Count == 0)
-			Checkmate(Turn == 'w' ? 'b' : 'w');
-		else if (LookForStalemate(Turn))
+		if (LookForMate(Turn)) {
+			if (LookForChecks(Turn))
+				Checkmate(Turn == 'w' ? 'b' : 'w');
+			else
 				Stalemate(Turn);
+		}
 	}
 	
 	private void Checkmate(char col) {
