@@ -108,7 +108,7 @@ public class Square : Node2D {
 		var piece = (Piece)Scene.Instance();
 		piece.SetColour(colour);
 		var sprite = piece.GetNode<Sprite>("Sprite");
-		sprite.Scale = new Vector2((float)0.9, (float)0.9);
+		sprite.Scale = new Vector2(0.9F, 0.9F);
 		sprite.Position = new Vector2(sprite.Position.x + 1, sprite.Position.y);
 		AddChild(piece);
 	}
@@ -124,7 +124,7 @@ public class Square : Node2D {
 		var piece = (Piece)Scene.Instance();
 		piece.SetColour(colour);
 		var sprite = piece.GetNode<Sprite>("Sprite");
-		sprite.Scale = new Vector2((float)0.9, (float)0.9);
+		sprite.Scale = new Vector2(0.9F, 0.9F);
 		sprite.Position = new Vector2(sprite.Position.x + 1, sprite.Position.y);
 		AddChild(piece);
 	}
