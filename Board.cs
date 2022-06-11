@@ -208,6 +208,9 @@ public class Board : Node2D
 						CheckForEnd();
 						LookForPromotion();
 					}
+					else {
+						Selected = null;
+					}
 				}
 			}
 		}
