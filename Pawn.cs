@@ -20,15 +20,13 @@ public class Pawn : Piece {
 		
 		try {
 			targetCol = board[(int)origin.x, (int)origin.y + dir * 1].GetPieceColour();
-			if (targetCol == 'n')
+			if (targetCol == 'n') {
 				moves.Add(new Vector2(origin.x, origin.y + dir * 1));	
-		}
-		catch (System.IndexOutOfRangeException) {}
-			
-		try {
-			targetCol = board[(int)origin.x, (int)origin.y + dir * 2].GetPieceColour();
-			if (targetCol == 'n' && (((int)origin.y == 1 && Colour == 'w') || ((int)origin.y == 6 && Colour == 'b')))
-				moves.Add(new Vector2(origin.x, origin.y + dir * 2));
+
+				targetCol = board[(int)origin.x, (int)origin.y + dir * 2].GetPieceColour();
+				if (targetCol == 'n' && (((int)origin.y == 1 && Colour == 'w') || ((int)origin.y == 6 && Colour == 'b')))
+					moves.Add(new Vector2(origin.x, origin.y + dir * 2));
+			}
 		}
 		catch (System.IndexOutOfRangeException) {}
 		

@@ -3,8 +3,10 @@ using System;
 
 public class Square : Node2D {	
 	public Vector2 Pos;
-	public static Color DARK_SQUARE = new Color(0, 0, 0, (float)0.63);
-	public static Color LIGHT_SQUARE = new Color(0, 0, 0, 0);
+	public static Color DARK_SQUARE = new Color(0, 0.5F, 0, 1);
+	public static Color LIGHT_SQUARE = new Color(0.95F, 0.95F, 1, 1);
+	public static Color DARK_HIGHLIGHT = new Color(0.1F, 0.3F, 0.1F, 1);
+	public static Color LIGHT_HIGHLIGHT = new Color(0.6F, 1, 0.6F, 1);
 	
 	public Square() {
 		this.Pos = new Vector2(0, 0);
@@ -29,15 +31,19 @@ public class Square : Node2D {
 	
 	public void SetPos(int x, int y) {
 		this.Pos = new Vector2(x, y);
+		GetNode<Polygon2D>("Sprite").Color = ((int)(Pos.x + Pos.y) % 2 == 0 ? 
+			DARK_SQUARE : LIGHT_SQUARE);
 	}
 	
 	public void SetPos(Vector2 Pos) {
+		GetNode<Polygon2D>("Sprite").Color = ((int)(Pos.x + Pos.y) % 2 == 0 ? 
+			DARK_SQUARE : LIGHT_SQUARE);
 		this.Pos = Pos;
 	}
 	
 	public void Highlight() {
-		var sprite = (Polygon2D)GetNode("Sprite");
-		sprite.Color = new Color((float)0.92, 1, 0, (float)1);
+		GetNode<Polygon2D>("Sprite").Color = ((int)(Pos.x + Pos.y) % 2 == 0 ? 
+			DARK_HIGHLIGHT : LIGHT_HIGHLIGHT);
 	}
 	
 	public void Clear() {

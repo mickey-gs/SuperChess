@@ -9,12 +9,13 @@ public class Board : Node2D
 	
 	public Vector2 ScreenSize;
 	private Square[,] squares;
-	public static Vector2 EnPassantSq = new Vector2(-1, -1);
+	public Vector2 EnPassantSq = new Vector2(-1, -1);
 	private char Turn = 'w';
 	private Square Selected = null;
 	private string Fen = StandardFEN;
 	private int PromotionFile = 9;
 	private bool Active = true;
+	private bool[] CastleRights = {true, true, true, true};
 
 	public const string StandardFEN = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR";
 	
@@ -26,10 +27,10 @@ public class Board : Node2D
 		for (int i = 0; i < 8; i++) {
 			for (int j = 0; j < 8; j++) {
 				squares[i,j] = (Square)scene.Instance();
-				if (board[i,j].GetPieceColour() != 'n')
-					squares[i,j].BestowPiece(board[i,j].GetPieceName(), board[i,j].GetPieceColour());
-
 				squares[i,j].SetPos(new Vector2(i, j));
+				if (board[i,j].GetPieceColour() != 'n') {
+					squares[i,j].BestowPiece(board[i,j].GetPieceName(), board[i,j].GetPieceColour());
+				}
 			}
 		}
 	}
@@ -44,21 +45,18 @@ public class Board : Node2D
 				squares[j,i].SetPos(new Vector2(j, i));
 				squares[j,i].Position = 
 					new Vector2((width / 8) * j, width - (width / 8) * (i + 1));
-				if ((i + j) % 2 != 0) {
-					squares[i,j].GetNode<Polygon2D>("Sprite").Color = LightSquares;
-				}
 			}
 		}
 	}
 	
-	private List<Vector2> AllAttacks(Square[,] board, char col) {
+	public List<Vector2> AllAttacks(char col) {
 		List<Vector2> allAttacks = new List<Vector2> {};
 		for (int i = 0; i < 8; i++) {
 			for (int j = 0; j < 8; j++) {
-				if (board[i, j].GetPieceColour() == col) {
+				if (squares[i, j].GetPieceColour() == col) {
 					try {
-						var p = (Piece)board[i, j].GetChildren()[3];
-						allAttacks.AddRange(p.Moves(board, board[i, j].Pos, EnPassantSq));
+						var p = (Piece)squares[i, j].GetChildren()[3];
+						allAttacks.AddRange(p.Moves(squares, squares[i, j].Pos, EnPassantSq));
 					}
 					catch (System.IndexOutOfRangeException) {}
 				}
@@ -75,7 +73,7 @@ public class Board : Node2D
 				if (board[i, j].GetPieceColour() == col) {
 					try {
 						var p = (Piece)board[i, j].GetChildren()[3];
-						allMoves.AddRange(p.LegalMoves(board, board[i, j].Pos, EnPassantSq));
+						allMoves.AddRange(p.LegalMoves(board, board[i, j].Pos, this));
 					}
 					catch (System.IndexOutOfRangeException) {}
 				}
@@ -91,7 +89,7 @@ public class Board : Node2D
 				if (squares[i, j].GetPieceColour() == col) {
 					try {
 						var p = (Piece)squares[i, j].GetChildren()[3];
-						if (p.LegalMoves(squares, squares[i, j].Pos, EnPassantSq).Count != 0)
+						if (p.LegalMoves(squares, squares[i, j].Pos, this).Count != 0)
 							return false;
 					}
 					catch (System.IndexOutOfRangeException) {
@@ -123,6 +121,52 @@ public class Board : Node2D
 		return false;
 	}
 	
+	public bool CastleKingside(Piece king) {
+		if (LookForChecks(king.Colour)) 
+			return false;
+		if (king.Colour == 'w' && CastleRights[1]) {
+			for (int i = 5; i < 7; i++) {
+				if (squares[i,0].GetPieceColour() != 'n'|| 
+					AllAttacks('b').Contains(new Vector2(i,0))) {
+					return false;
+				}
+			}
+			return true;
+		}
+		else if (CastleRights[3]) {
+			for (int i = 5; i < 7; i++) {
+				if (squares[i,7].GetPieceColour() != 'n'|| 
+					AllAttacks('w').Contains(new Vector2(i,0)))
+					return false;
+			}
+			return true;
+		}
+		return false;
+	}
+	
+	public bool CastleQueenside(Piece king) {
+		if (LookForChecks(king.Colour)) 
+			return false;
+		if (king.Colour == 'w' && CastleRights[0]) {
+			for (int i = 3; i >= 1; i--) {
+				if (squares[i,0].GetPieceColour() != 'n' || 
+					AllAttacks('b').Contains(new Vector2(i,0))) {
+					return false;
+				}
+			}
+			return true;
+		}
+		else if (CastleRights[2]) {
+			for (int i = 3; i >= 1; i--) {
+				if (squares[i,7].GetPieceColour() != 'n'|| 
+					AllAttacks('w').Contains(new Vector2(i,7)))
+					return false;
+			}
+			return true;
+		}
+		return false;
+	}
+	
 	private void Clear() {
 		var children = GetChildren();
 		for (int i = 0; i < children.Count; i++) {
@@ -149,7 +193,7 @@ public class Board : Node2D
 				Selected = squares[file, rank];
 				var p = (Piece)squares[file, rank].GetChildren()[3];
 				squares[file, rank].Highlight();
-				foreach (var dest in p.LegalMoves(squares, new Vector2(file, rank), EnPassantSq)) {
+				foreach (var dest in p.LegalMoves(squares, new Vector2(file, rank), this)) {
 					squares[(int)dest.x, (int)dest.y].Highlight();
 				}
 			}
@@ -157,14 +201,15 @@ public class Board : Node2D
 				if (squares[file, rank].GetPieceColour() == Turn) {
 					HighlightMoves(file, rank);
 				}
-				else {
-					HandleMove(file, rank);
-					CheckForEnd();
-					LookForPromotion();
+				else { 
+					var p = (Piece)Selected.GetChildren()[3];
+					if (p.LegalMoves(squares, Selected.Pos, this).Contains(new Vector2(file, rank))) {
+						HandleMove(file, rank, p);
+						CheckForEnd();
+						LookForPromotion();
+					}
 				}
 			}
-			
-			
 		}
 		catch (System.IndexOutOfRangeException) {}
 	}
@@ -173,24 +218,33 @@ public class Board : Node2D
 		Selected = squares[file, rank];
 		var p = (Piece)squares[file, rank].GetChildren()[3];
 		squares[file, rank].Highlight();
-		foreach (var dest in p.LegalMoves(squares, new Vector2(file, rank), EnPassantSq)) {
+		foreach (var dest in p.LegalMoves(squares, new Vector2(file, rank), this)) {
 			squares[(int)dest.x, (int)dest.y].Highlight();
 		}
 	}
 	
-	private void HandleMove(int file, int rank) {
-		var p = (Piece)Selected.GetChildren()[3];
-		if (p.LegalMoves(squares, Selected.Pos, EnPassantSq).Contains(new Vector2(file, rank))) {
-			if (file == (int)EnPassantSq.x && rank == (int)EnPassantSq.y
-				&& Selected.GetPieceName() == "Pawn") {
-				squares[file, rank + (Turn == 'w' ? -1 : 1)].RemovePiece();
+	private void HandleMove(int file, int rank, Piece piece) {
+		if (file == (int)EnPassantSq.x && rank == (int)EnPassantSq.y
+			&& Selected.GetPieceName() == "Pawn") {
+			squares[file, rank + (Turn == 'w' ? -1 : 1)].RemovePiece();
+		}
+		EnPassantSq = new Vector2(-1, -1);
+		squares[file, rank].BestowPiece(Selected.GetPieceName(), Turn);
+		if (Selected.GetPieceName() == "Pawn" && Math.Abs(Selected.Pos.y - rank) > 1)
+			EnPassantSq = new Vector2(file, rank + (Turn == 'w' ? -1 : 1));
+		Turn = (Turn == 'w' ? 'b' : 'w');
+		Selected.RemovePiece();
+		
+		if (squares[file, rank].GetPieceName() == "King" && Math.Abs(file - Selected.Pos.x) > 1) {
+			int kingRank = (squares[file, rank].GetPieceColour() == 'w' ? 0 : 7);
+			if (file == 2) {
+				squares[0,kingRank].RemovePiece();
+				squares[3,kingRank].BestowPiece("Rook", squares[file,rank].GetPieceColour());
 			}
-			EnPassantSq = new Vector2(-1, -1);
-			squares[file, rank].BestowPiece(Selected.GetPieceName(), Turn);
-			if (Selected.GetPieceName() == "Pawn" && Math.Abs(Selected.Pos.y - rank) > 1)
-				EnPassantSq = new Vector2(file, rank + (Turn == 'w' ? -1 : 1));
-			Turn = (Turn == 'w' ? 'b' : 'w');
-			Selected.RemovePiece();
+			else {
+				squares[7,kingRank].RemovePiece();
+				squares[5,kingRank].BestowPiece("Rook", squares[file,rank].GetPieceColour());
+			}
 		}
 	}
 	
