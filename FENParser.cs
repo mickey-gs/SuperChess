@@ -8,8 +8,16 @@ public class FENParser : Node2D {
 //		GD.Print(board[0,0].GetPieceName() + board[0,0].GetPieceColour());
 //	}
 	
-	public static Square[,] Parse(string fen) {
-		string[] splitFen = fen.Split("/");
+	public static Board Parse(string fen) {
+		string[] setup = fen.Split(" ");
+		char turn = setup[1][0];
+		string rights = setup[2];
+		bool[] castlingRights = {rights.Contains("Q"), rights.Contains("K"),
+			rights.Contains("q"), rights.Contains("k")};
+		Vector2 enPassantSq = Square.NotationToPos(setup[3]);
+		int[] halfmoves = {int.Parse(setup[4]), int.Parse(setup[5].ToString())};
+		
+		string[] splitFen = setup[0].Split("/");
 		Square[,] output = new Square[8,8];
 		var scene = GD.Load<PackedScene>("res://Square.tscn");
 		for (int i = 0; i < 8; i++) {
@@ -62,6 +70,6 @@ public class FENParser : Node2D {
 				}
 			}
 		}
-		return output;
+		return new Board(output, turn, castlingRights, enPassantSq, halfmoves);
 	}
 }

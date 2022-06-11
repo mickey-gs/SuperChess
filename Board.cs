@@ -16,8 +16,9 @@ public class Board : Node2D
 	private int PromotionFile = 9;
 	private bool Active = true;
 	private bool[] CastleRights = {true, true, true, true};
+	private int[] Halfmoves = {1, 0};
 
-	public const string StandardFEN = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR";
+	public const string StandardFEN = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 1 0";
 	
 	public Board() {}
 	
@@ -34,11 +35,28 @@ public class Board : Node2D
 			}
 		}
 	}
+	
+	public Board(Square[,] board, char turn, bool[] rights, Vector2 enPSq, int[] halfmoves) {
+		Turn = turn;
+		CastleRights = rights;
+		EnPassantSq = enPSq;
+		Halfmoves = halfmoves;
+		squares = new Square[8,8];
+		var scene = GD.Load<PackedScene>("res://Square.tscn");
+		for (int i = 0; i < 8; i++) {
+			for (int j = 0; j < 8; j++) {
+				squares[i,j] = (Square)scene.Instance();
+				squares[i,j].SetPos(new Vector2(i, j));
+				if (board[i,j].GetPieceColour() != 'n') {
+					squares[i,j].BestowPiece(board[i,j].GetPieceName(), board[i,j].GetPieceColour());
+				}
+			}
+		}
+	}
 
 	public override void _Ready() {
 		var parent = (GameSpace)GetParent();
 		float width = parent.BoardWidth();
-		squares = FENParser.Parse(Fen);
 		for (int i = 0; i < 8; i++) {
 			for (int j = 0; j < 8; j++) {
 				AddChild(squares[i,j]);
@@ -124,6 +142,7 @@ public class Board : Node2D
 	public bool CastleKingside(Piece king) {
 		if (LookForChecks(king.Colour)) 
 			return false;
+
 		if (king.Colour == 'w' && CastleRights[1]) {
 			for (int i = 5; i < 7; i++) {
 				if (squares[i,0].GetPieceColour() != 'n'|| 
@@ -136,7 +155,7 @@ public class Board : Node2D
 		else if (CastleRights[3]) {
 			for (int i = 5; i < 7; i++) {
 				if (squares[i,7].GetPieceColour() != 'n'|| 
-					AllAttacks('w').Contains(new Vector2(i,0)))
+					AllAttacks('w').Contains(new Vector2(i,7)))
 					return false;
 			}
 			return true;
@@ -226,7 +245,28 @@ public class Board : Node2D
 		}
 	}
 	
+	private void RemoveRights(char col) {
+		if (col == 'w') {
+			CastleRights[0] = false;
+			CastleRights[1] = false;
+		}
+		else {
+			CastleRights[2] = false;
+			CastleRights[3] = false;
+		}
+	}
+	
+	private void RemoveRights(char col, int file) {
+		if (col == 'w') {
+			CastleRights[file == 0 ? 0 : 1] = false;
+		}
+		else {
+			CastleRights[file == 0 ? 2 : 3] = false;
+		}
+	}
+	
 	private void HandleMove(int file, int rank, Piece piece) {
+		GD.Print(squares[file,rank].GetPosNotation());
 		if (file == (int)EnPassantSq.x && rank == (int)EnPassantSq.y
 			&& Selected.GetPieceName() == "Pawn") {
 			squares[file, rank + (Turn == 'w' ? -1 : 1)].RemovePiece();
@@ -249,6 +289,12 @@ public class Board : Node2D
 				squares[5,kingRank].BestowPiece("Rook", squares[file,rank].GetPieceColour());
 			}
 		}
+		
+		if (squares[file,rank].GetPieceName() == "King") 
+			RemoveRights(squares[file,rank].GetPieceColour());
+			
+		if (squares[file,rank].GetPieceName() == "Rook")
+			RemoveRights(squares[file,rank].GetPieceColour(), file);
 	}
 	
 	private void LookForPromotion() {

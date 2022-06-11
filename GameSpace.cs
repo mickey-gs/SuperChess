@@ -3,14 +3,14 @@ using System;
 
 public class GameSpace : Area2D
 {
-	// Declare member variables here. Examples:
-	// private int a = 2;
-	// private string b = "text";
+	private string Fen = "r1bqkb1r/pppppppp/8/8/8/8/PPPPPPPP/R1BQKB1R b KQkq - 1 0";
 
 	// Called when the node enters the scene tree for the first time.
-	public override void _Ready()
-	{
-		
+	public override void _Ready() {
+		var scene = GD.Load<PackedScene>("res://Board.tscn");
+		Board board = (Board)scene.Instance();
+		board = FENParser.Parse(Fen);
+		AddChild(board);
 	}
 	
 	public float BoardWidth() {

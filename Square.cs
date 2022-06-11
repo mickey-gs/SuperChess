@@ -21,14 +21,6 @@ public class Square : Node2D {
 		Connect("input_event", parent, "_on_Square_input_event");
 	}
 	
-	public override void _Process(float delta) {
-//		if (Input.IsActionPressed("ui_click")) {
-//			EmitSignal(nameof(Clicked));
-//			GD.Print(this.Pos);
-//			EmitSignal("ClickedPlus", this.Pos);
-//		}
-	}
-	
 	public void SetPos(int x, int y) {
 		this.Pos = new Vector2(x, y);
 		GetNode<Polygon2D>("Sprite").Color = ((int)(Pos.x + Pos.y) % 2 == 0 ? 
@@ -69,6 +61,20 @@ public class Square : Node2D {
 		catch (System.IndexOutOfRangeException e) {
 			return "empty";
 		}
+	}
+	
+	public static Vector2 NotationToPos(string notated) {
+		if (notated[0] == '-') 
+			return new Vector2(-1, -1);
+
+		return new Vector2((int)(notated[0] - 1), (int)notated[1]);
+	}
+	
+	public string GetPosNotation() {
+		string ret = "";
+		ret += (char)('a' + Pos.x);
+		ret += ((int)Pos.y + 1).ToString();
+		return ret;
 	}
 	
 	public void BestowPiece(Names name, char colour) {
