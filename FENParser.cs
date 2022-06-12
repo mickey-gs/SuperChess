@@ -2,12 +2,6 @@ using Godot;
 using System;
 
 public class FENParser : Node2D {
-	
-//	public override void _Ready() {
-//		var board = Parse("rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR");
-//		GD.Print(board[0,0].GetPieceName() + board[0,0].GetPieceColour());
-//	}
-	
 	public static Board Parse(string fen) {
 		string[] setup = fen.Split(" ");
 		char turn = setup[1][0];

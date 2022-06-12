@@ -10,7 +10,8 @@ public class GameSpace : Area2D
 	public override void _Ready() {
 		var scene = GD.Load<PackedScene>("res://Board.tscn");
 		Board board = (Board)scene.Instance();
-		board = FENParser.Parse(Fen);
+		board = new Board();
+		board.Name = "PlaceholderBoard";
 		AddChild(board);
 		board.Connect("TurnChange", this, nameof(_on_Turn_Change));
 		
@@ -44,13 +45,17 @@ public class GameSpace : Area2D
 			timer.Stop();
 	}
 	
+	public void _on_Board_GameEnd() {
+		StopClocks();
+	}
+	
 	public void _on_White_Timeout() {
-		((Board)GetChildren()[4]).Timeout('w');
+		((Board)GetNode("Board")).Timeout('w');
 		StopClocks();
 	}
 	
 	public void _on_Black_Timeout() {
-		((Board)GetChildren()[4]).Timeout('b');
+		((Board)GetNode("Board")).Timeout('b');
 		StopClocks();
 	}
 	
@@ -65,5 +70,17 @@ public class GameSpace : Area2D
 			Timers[1].Stop();
 			Timers[0].Start(Times[0]);
 		}
+	}
+
+	private void _on_StartButton_pressed(LineEdit a) {	
+		GetNode("PlaceholderBoard").QueueFree();
+		
+		var scene = GD.Load<PackedScene>("res://Board.tscn");
+		Board board = (Board)scene.Instance();
+		board = FENParser.Parse(a.Text);
+		board.Name = "Board";
+		AddChild(board, true);
+		board.Connect("TurnChange", this, nameof(_on_Turn_Change));
+		board.Connect("GameEnd", this, nameof(_on_Board_GameEnd));
 	}
 }

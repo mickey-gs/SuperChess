@@ -9,6 +9,8 @@ public class Board : Node2D
 	
 	[Signal]
 	public delegate void TurnChange();
+	[Signal]
+	public delegate void GameEnd();
 	
 	public Vector2 ScreenSize;
 	private Square[,] squares;
@@ -23,7 +25,16 @@ public class Board : Node2D
 
 	public const string StandardFEN = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 1 0";
 	
-	public Board() {}
+	public Board() {
+		squares = new Square[8,8];
+		var scene = GD.Load<PackedScene>("res://Square.tscn");
+		for (int i = 0; i < 8; i++) {
+			for (int j = 0; j < 8; j++) {
+				squares[i,j] = (Square)scene.Instance();
+				squares[i,j].SetPos(new Vector2(i, j));
+			}
+		}
+	}
 	
 	public Board(Square[,] board) {
 		squares = new Square[8,8];
@@ -360,6 +371,8 @@ public class Board : Node2D
 				Checkmate(Turn == 'w' ? 'b' : 'w');
 			else
 				Stalemate(Turn);
+		
+			EmitSignal(nameof(GameEnd));
 		}
 	}
 	

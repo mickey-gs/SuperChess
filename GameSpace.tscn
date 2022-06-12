@@ -1,8 +1,9 @@
-[gd_scene load_steps=6 format=2]
+[gd_scene load_steps=7 format=2]
 
 [ext_resource path="res://assets/KdamThmorPro-Regular.ttf" type="DynamicFontData" id=1]
 [ext_resource path="res://GameSpace.cs" type="Script" id=2]
 [ext_resource path="res://ChessClock.cs" type="Script" id=3]
+[ext_resource path="res://StartButton.cs" type="Script" id=4]
 
 [sub_resource type="RectangleShape2D" id=1]
 extents = Vector2( 256, 256 )
@@ -58,3 +59,21 @@ margin_left = 4.0
 margin_top = 32.0
 margin_right = -4.0
 margin_bottom = -4.0
+
+[node name="Label" type="Label" parent="TabContainer/Game"]
+margin_right = 288.0
+margin_bottom = 14.0
+text = "FEN for Starting Position"
+
+[node name="StartFEN" type="LineEdit" parent="TabContainer/Game"]
+margin_top = 18.0
+margin_right = 288.0
+margin_bottom = 42.0
+text = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 1 0"
+
+[node name="StartButton" type="Button" parent="TabContainer/Game"]
+margin_top = 46.0
+margin_right = 288.0
+margin_bottom = 66.0
+text = "START"
+script = ExtResource( 4 )
