@@ -7,6 +7,9 @@ public class Board : Node2D
 	[Export]
 	public Color LightSquares = new Color(1,1,1,(float)0.5);
 	
+	[Signal]
+	public delegate void TurnChange();
+	
 	public Vector2 ScreenSize;
 	private Square[,] squares;
 	public Vector2 EnPassantSq = new Vector2(-1, -1);
@@ -57,12 +60,13 @@ public class Board : Node2D
 	public override void _Ready() {
 		var parent = (GameSpace)GetParent();
 		float width = parent.BoardWidth();
+		float yOffset = parent.BoardOffset().y;
 		for (int i = 0; i < 8; i++) {
 			for (int j = 0; j < 8; j++) {
 				AddChild(squares[i,j]);
 				squares[j,i].SetPos(new Vector2(j, i));
 				squares[j,i].Position = 
-					new Vector2((width / 8) * j, width - (width / 8) * (i + 1));
+					new Vector2((width / 8) * j, yOffset + (width - (width / 8) * (i + 1)));
 			}
 		}
 	}
@@ -121,6 +125,7 @@ public class Board : Node2D
 	}
 	
 	public bool LookForChecks(char col) {
+		try {
 		Square kingSquare = null;
 		for (int i = 0; i < 8; i++) {
 			for (int j = 0; j < 8; j++) {
@@ -136,6 +141,8 @@ public class Board : Node2D
 					return true;
 			}
 		}
+		}
+		catch (System.NullReferenceException) {}
 		return false;
 	}
 	
@@ -186,6 +193,17 @@ public class Board : Node2D
 		return false;
 	}
 	
+	public void Timeout(char col) {
+		if (col == 'b') {
+			GD.Print("White wins on time.");
+			Active = false;
+		}
+		else if (col == 'w') {
+			GD.Print("Black wins on time.");
+			Active = false;
+		}
+	}
+	
 	private void Clear() {
 		var children = GetChildren();
 		for (int i = 0; i < children.Count; i++) {
@@ -201,8 +219,11 @@ public class Board : Node2D
 		if (!Active)
 			return;
 		
-		int file = (int)((position.x / 500) * 8);
-		int rank = (int)(((500 - position.y) / 500) * 8);
+		var parent = (GameSpace)GetParent();
+		float offset = parent.BoardOffset().y;
+		float width = parent.BoardWidth();
+		int file = (int)((position.x / width) * 8);
+		int rank = (int)((((offset + width) - position.y) / width) * 8);
 			
 		try {	
 			if (Selected == null) {
@@ -295,6 +316,8 @@ public class Board : Node2D
 			
 		if (squares[file,rank].GetPieceName() == "Rook")
 			RemoveRights(squares[file,rank].GetPieceColour(), file);
+	
+		EmitSignal(nameof(TurnChange), Turn);
 	}
 	
 	private void LookForPromotion() {
@@ -332,6 +355,7 @@ public class Board : Node2D
 	
 	private void CheckForEnd() {
 		if (LookForMate(Turn)) {
+			Active = false;
 			if (LookForChecks(Turn))
 				Checkmate(Turn == 'w' ? 'b' : 'w');
 			else
