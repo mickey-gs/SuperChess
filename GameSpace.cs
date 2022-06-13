@@ -40,6 +40,18 @@ public class GameSpace : Area2D
 		return ret;
 	}
 	
+	private void UpdateClocks() {
+		for (int i = 0; i < 2; i++) {
+			Timers[i].Start(Times[i]);
+		}
+		
+		((ChessClock)GetNode("BClock")).Update();
+		((ChessClock)GetNode("WClock")).Update();
+		
+		Timers[0].Stop();
+		Timers[1].Stop();
+	}
+	
 	private void StopClocks() {
 		foreach (var timer in Timers)
 			timer.Stop();
@@ -82,5 +94,74 @@ public class GameSpace : Area2D
 		AddChild(board, true);
 		board.Connect("TurnChange", this, nameof(_on_Turn_Change));
 		board.Connect("GameEnd", this, nameof(_on_Board_GameEnd));
+	}
+	
+	
+	private void _on_WhiteClockOption_item_selected(int index) {
+		switch (index) {
+			case 0:
+				Times[0] = 1 * 60;
+				break;
+			
+			case 1:
+				Times[0] = 2 * 60;
+				break;
+				
+			case 2:
+				Times[0] = 3 * 60;
+				break;
+				
+			case 3:
+				Times[0] = 5 * 60;
+				break;
+				
+			case 4:
+				Times[0] = 10 * 60;
+				break;
+				
+			case 5:
+				Times[0] = 15 * 60;
+				break;
+				
+			case 6:
+				Times[0] = 60 * 60;
+				break;
+		}
+		StopClocks();
+		UpdateClocks();
+	}
+
+	private void _on_BlackClockOption_item_selected(int index) {
+		switch (index) {
+			case 0:
+				Times[1] = 1 * 60;
+				break;
+			
+			case 1:
+				Times[1] = 2 * 60;
+				break;
+				
+			case 2:
+				Times[1] = 3 * 60;
+				break;
+				
+			case 3:
+				Times[1] = 5 * 60;
+				break;
+				
+			case 4:
+				Times[1] = 10 * 60;
+				break;
+				
+			case 5:
+				Times[1] = 15 * 60;
+				break;
+				
+			case 6:
+				Times[1] = 60 * 60;
+				break;
+		}
+		StopClocks();
+		UpdateClocks();
 	}
 }

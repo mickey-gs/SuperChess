@@ -31,7 +31,7 @@ bbcode_enabled = true
 script = ExtResource( 3 )
 
 [node name="Timer" type="Timer" parent="BClock"]
-wait_time = 300.0
+wait_time = 60.0
 autostart = true
 
 [node name="WClock" type="RichTextLabel" parent="."]
@@ -43,7 +43,7 @@ bbcode_enabled = true
 script = ExtResource( 3 )
 
 [node name="Timer" type="Timer" parent="WClock"]
-wait_time = 300.0
+wait_time = 60.0
 autostart = true
 
 [node name="TabContainer" type="TabContainer" parent="."]
@@ -71,9 +71,50 @@ margin_right = 288.0
 margin_bottom = 42.0
 text = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 1 0"
 
-[node name="StartButton" type="Button" parent="TabContainer/Game"]
+[node name="HBoxContainer" type="HBoxContainer" parent="TabContainer/Game"]
 margin_top = 46.0
 margin_right = 288.0
 margin_bottom = 66.0
+
+[node name="Label" type="Label" parent="TabContainer/Game/HBoxContainer"]
+margin_top = 3.0
+margin_right = 187.0
+margin_bottom = 17.0
+text = "Black Starting Time (minutes)"
+
+[node name="BlackClockOption" type="OptionButton" parent="TabContainer/Game/HBoxContainer"]
+margin_left = 191.0
+margin_right = 228.0
+margin_bottom = 20.0
+text = "1"
+items = [ "1", null, false, 0, null, "2", null, false, 1, null, "3", null, false, 2, null, "5", null, false, 3, null, "10", null, false, 4, null, "15", null, false, 5, null, "60", null, false, 6, null ]
+selected = 0
+
+[node name="HBoxContainer2" type="HBoxContainer" parent="TabContainer/Game"]
+margin_top = 70.0
+margin_right = 288.0
+margin_bottom = 90.0
+
+[node name="Label" type="Label" parent="TabContainer/Game/HBoxContainer2"]
+margin_top = 3.0
+margin_right = 191.0
+margin_bottom = 17.0
+text = "White Starting Time (minutes)"
+
+[node name="WhiteClockOption" type="OptionButton" parent="TabContainer/Game/HBoxContainer2"]
+margin_left = 195.0
+margin_right = 232.0
+margin_bottom = 20.0
+text = "1"
+items = [ "1", null, false, 0, null, "2", null, false, 1, null, "3", null, false, 2, null, "5", null, false, 3, null, "10", null, false, 4, null, "15", null, false, 5, null, "60", null, false, 6, null ]
+selected = 0
+
+[node name="StartButton" type="Button" parent="TabContainer/Game"]
+margin_top = 94.0
+margin_right = 288.0
+margin_bottom = 114.0
 text = "START"
 script = ExtResource( 4 )
+
+[connection signal="item_selected" from="TabContainer/Game/HBoxContainer/BlackClockOption" to="." method="_on_BlackClockOption_item_selected"]
+[connection signal="item_selected" from="TabContainer/Game/HBoxContainer2/WhiteClockOption" to="." method="_on_WhiteClockOption_item_selected"]
