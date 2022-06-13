@@ -99,6 +99,15 @@ public class Board : Node2D
 		return allAttacks;
 	}
 	
+	public void LoadFrom(Board toLoad) {
+		Turn = toLoad.Turn;
+		Halfmoves = toLoad.Halfmoves;
+		squares = toLoad.squares;
+		EnPassantSq = toLoad.EnPassantSq;
+		CastleRights = toLoad.CastleRights;
+		_Ready();
+	}
+	
 	private List<Vector2> AllMoves(Square[,] board, char col) {
 		List<Vector2> allMoves = new List<Vector2> {};
 		for (int i = 0; i < 8; i++) {
@@ -298,7 +307,6 @@ public class Board : Node2D
 	}
 	
 	private void HandleMove(int file, int rank, Piece piece) {
-		GD.Print(squares[file,rank].GetPosNotation());
 		if (file == (int)EnPassantSq.x && rank == (int)EnPassantSq.y
 			&& Selected.GetPieceName() == "Pawn") {
 			squares[file, rank + (Turn == 'w' ? -1 : 1)].RemovePiece();
@@ -376,8 +384,20 @@ public class Board : Node2D
 		}
 	}
 	
+	private void HighlightLoser(char col) {
+		Square kingSquare = null;
+		for (int i = 0; i < 8; i++) {
+			for (int j = 0; j < 8; j++) {
+				if (squares[i,j].GetPieceName() == "King" && squares[i,j].GetPieceColour() == col)
+					kingSquare = squares[i,j];
+			}
+		}
+		kingSquare.RedHighlight();
+	}
+	
 	private void Checkmate(char col) {
 		string winner = (col == 'w' ? "White" : "Black");
+		HighlightLoser(col == 'w' ? 'b' : 'w');
 		GD.Print($"Checkmate! {winner} wins!");
 	}
 	

@@ -6,12 +6,13 @@ public class GameSpace : Area2D
 	private string Fen = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 1 0";
 	private Timer[] Timers = new Timer[2];
 	private float[] Times = new float[2];
+	private float[] MaxTimes = new float[2];
 
 	public override void _Ready() {
 		var scene = GD.Load<PackedScene>("res://Board.tscn");
 		Board board = (Board)scene.Instance();
 		board = new Board();
-		board.Name = "PlaceholderBoard";
+		board.Name = "Board";
 		AddChild(board);
 		board.Connect("TurnChange", this, nameof(_on_Turn_Change));
 		
@@ -23,6 +24,7 @@ public class GameSpace : Area2D
 	
 		Timers = new Timer[2] {wTimer, bTimer};
 		Times = new float[2] {wTimer.TimeLeft, bTimer.TimeLeft};
+		MaxTimes = new float[2] {wTimer.TimeLeft, bTimer.TimeLeft};
 		Timers[1].Stop();
 		Timers[0].Stop();
 	}
@@ -57,6 +59,14 @@ public class GameSpace : Area2D
 			timer.Stop();
 	}
 	
+	private void ResetClocks() {
+		Times[0] = MaxTimes[0];
+		Times[1] = MaxTimes[1];
+	
+		UpdateClocks();
+		StopClocks();
+	}
+	
 	public void _on_Board_GameEnd() {
 		StopClocks();
 	}
@@ -84,84 +94,82 @@ public class GameSpace : Area2D
 		}
 	}
 
-	private void _on_StartButton_pressed(LineEdit a) {	
-		GetNode("PlaceholderBoard").QueueFree();
-		
+	private void _on_StartButton_pressed(LineEdit a) {
 		var scene = GD.Load<PackedScene>("res://Board.tscn");
 		Board board = (Board)scene.Instance();
 		board = FENParser.Parse(a.Text);
 		board.Name = "Board";
-		AddChild(board, true);
+		var b = (Board)GetNode("Board");
+		b.LoadFrom(board);
 		board.Connect("TurnChange", this, nameof(_on_Turn_Change));
 		board.Connect("GameEnd", this, nameof(_on_Board_GameEnd));
+		ResetClocks();
 	}
 	
 	
 	private void _on_WhiteClockOption_item_selected(int index) {
 		switch (index) {
 			case 0:
-				Times[0] = 1 * 60;
+				MaxTimes[0] = 1 * 60;
 				break;
 			
 			case 1:
-				Times[0] = 2 * 60;
+				MaxTimes[0] = 2 * 60;
 				break;
 				
 			case 2:
-				Times[0] = 3 * 60;
+				MaxTimes[0] = 3 * 60;
 				break;
 				
 			case 3:
-				Times[0] = 5 * 60;
+				MaxTimes[0] = 5 * 60;
 				break;
 				
 			case 4:
-				Times[0] = 10 * 60;
+				MaxTimes[0] = 10 * 60;
 				break;
 				
 			case 5:
-				Times[0] = 15 * 60;
+				MaxTimes[0] = 15 * 60;
 				break;
 				
 			case 6:
-				Times[0] = 60 * 60;
+				MaxTimes[0] = 60 * 60;
 				break;
 		}
-		StopClocks();
-		UpdateClocks();
+		ResetClocks();
 	}
 
 	private void _on_BlackClockOption_item_selected(int index) {
 		switch (index) {
 			case 0:
-				Times[1] = 1 * 60;
+				MaxTimes[1] = 1 * 60;
 				break;
 			
 			case 1:
-				Times[1] = 2 * 60;
+				MaxTimes[1] = 2 * 60;
 				break;
 				
 			case 2:
-				Times[1] = 3 * 60;
+				MaxTimes[1] = 3 * 60;
 				break;
 				
 			case 3:
-				Times[1] = 5 * 60;
+				MaxTimes[1] = 5 * 60;
 				break;
 				
 			case 4:
-				Times[1] = 10 * 60;
+				MaxTimes[1] = 10 * 60;
 				break;
 				
 			case 5:
-				Times[1] = 15 * 60;
+				MaxTimes[1] = 15 * 60;
 				break;
 				
 			case 6:
-				Times[1] = 60 * 60;
+				MaxTimes[1] = 60 * 60;
 				break;
 		}
-		StopClocks();
-		UpdateClocks();
+		ResetClocks();
 	}
 }

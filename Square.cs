@@ -7,6 +7,7 @@ public class Square : Node2D {
 	public static Color LIGHT_SQUARE = new Color(0.95F, 0.95F, 1, 1);
 	public static Color DARK_HIGHLIGHT = new Color(0.1F, 0.3F, 0.1F, 1);
 	public static Color LIGHT_HIGHLIGHT = new Color(0.6F, 1, 0.6F, 1);
+	public static Color RED_HIGHLIGHT = new Color(0.9F, 0, 0, 1);
 	
 	public Square() {
 		this.Pos = new Vector2(0, 0);
@@ -36,6 +37,10 @@ public class Square : Node2D {
 	public void Highlight() {
 		GetNode<Polygon2D>("Sprite").Color = ((int)(Pos.x + Pos.y) % 2 == 0 ? 
 			DARK_HIGHLIGHT : LIGHT_HIGHLIGHT);
+	}
+	
+	public void RedHighlight() {
+		GetNode<Polygon2D>("Sprite").Color = RED_HIGHLIGHT;
 	}
 	
 	public void Clear() {
