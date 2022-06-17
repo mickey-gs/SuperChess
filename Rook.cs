@@ -3,12 +3,9 @@ using System;
 using System.Collections.Generic;
 
 public class Rook : Piece {
-//	public override void _Ready() {
-//		var squares = FENParser.Parse("r7/8/8/8/8/8/8/8");
-//		foreach (var sq in Moves(squares, new Vector2(0, 7))) {
-//			GD.Print(sq);
-//		}
-//	}
+	public Rook() {
+		PieceName = Names.Rook;
+	}
 	
 	public override void SetColour(char col) {
 		Colour = col;

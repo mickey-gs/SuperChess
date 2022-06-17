@@ -16,7 +16,7 @@ public class Board : Node2D
 	private Square[,] squares;
 	public Vector2 EnPassantSq = new Vector2(-1, -1);
 	private char Turn = 'w';
-	private Square Selected = null;
+	private Square Origin = null;
 	private string Fen = StandardFEN;
 	private int PromotionFile = 9;
 	private bool Active = true;
@@ -149,7 +149,7 @@ public class Board : Node2D
 		Square kingSquare = null;
 		for (int i = 0; i < 8; i++) {
 			for (int j = 0; j < 8; j++) {
-				if (squares[i,j].GetPieceName() == "King" && squares[i,j].GetPieceColour() == col)
+				if (squares[i,j].GetPieceName() == Names.King && squares[i,j].GetPieceColour() == col)
 					kingSquare = squares[i,j];
 			}
 		}
@@ -246,11 +246,11 @@ public class Board : Node2D
 		int rank = (int)((((offset + width) - position.y) / width) * 8);
 			
 		try {	
-			if (Selected == null) {
+			if (Origin == null) {
 				if (squares[file, rank].GetPieceColour() != Turn)
 					return;
 				
-				Selected = squares[file, rank];
+				Origin = squares[file, rank];
 				var p = (Piece)squares[file, rank].GetChildren()[3];
 				squares[file, rank].Highlight();
 				foreach (var dest in p.LegalMoves(squares, new Vector2(file, rank), this)) {
@@ -262,14 +262,14 @@ public class Board : Node2D
 					HighlightMoves(file, rank);
 				}
 				else { 
-					var p = (Piece)Selected.GetChildren()[3];
-					if (p.LegalMoves(squares, Selected.Pos, this).Contains(new Vector2(file, rank))) {
+					var p = (Piece)Origin.GetChildren()[3];
+					if (p.LegalMoves(squares, Origin.Pos, this).Contains(new Vector2(file, rank))) {
 						HandleMove(file, rank, p);
 						CheckForEnd();
 						LookForPromotion();
 					}
 					else {
-						Selected = null;
+						Origin = null;
 					}
 				}
 			}
@@ -278,7 +278,7 @@ public class Board : Node2D
 	}
 	
 	private void HighlightMoves(int file, int rank) {
-		Selected = squares[file, rank];
+		Origin = squares[file, rank];
 		var p = (Piece)squares[file, rank].GetChildren()[3];
 		squares[file, rank].Highlight();
 		foreach (var dest in p.LegalMoves(squares, new Vector2(file, rank), this)) {
@@ -308,17 +308,17 @@ public class Board : Node2D
 	
 	private void HandleMove(int file, int rank, Piece piece) {
 		if (file == (int)EnPassantSq.x && rank == (int)EnPassantSq.y
-			&& Selected.GetPieceName() == "Pawn") {
+			&& Origin.GetPieceName() == Names.Pawn) {
 			squares[file, rank + (Turn == 'w' ? -1 : 1)].RemovePiece();
 		}
 		EnPassantSq = new Vector2(-1, -1);
-		squares[file, rank].BestowPiece(Selected.GetPieceName(), Turn);
-		if (Selected.GetPieceName() == "Pawn" && Math.Abs(Selected.Pos.y - rank) > 1)
+		squares[file, rank].BestowPiece(Origin.GetPieceName(), Turn);
+		if (Origin.GetPieceName() == Names.Pawn && Math.Abs(Origin.Pos.y - rank) > 1)
 			EnPassantSq = new Vector2(file, rank + (Turn == 'w' ? -1 : 1));
 		Turn = (Turn == 'w' ? 'b' : 'w');
-		Selected.RemovePiece();
+		Origin.RemovePiece();
 		
-		if (squares[file, rank].GetPieceName() == "King" && Math.Abs(file - Selected.Pos.x) > 1) {
+		if (squares[file, rank].GetPieceName() == Names.Pawn && Math.Abs(file - Origin.Pos.x) > 1) {
 			int kingRank = (squares[file, rank].GetPieceColour() == 'w' ? 0 : 7);
 			if (file == 2) {
 				squares[0,kingRank].RemovePiece();
@@ -330,10 +330,10 @@ public class Board : Node2D
 			}
 		}
 		
-		if (squares[file,rank].GetPieceName() == "King") 
+		if (squares[file,rank].GetPieceName() == Names.King) 
 			RemoveRights(squares[file,rank].GetPieceColour());
 			
-		if (squares[file,rank].GetPieceName() == "Rook")
+		if (squares[file,rank].GetPieceName() == Names.Rook)
 			RemoveRights(squares[file,rank].GetPieceColour(), file);
 	
 		EmitSignal(nameof(TurnChange), Turn);
@@ -341,30 +341,32 @@ public class Board : Node2D
 	
 	private void LookForPromotion() {
 		for (int i = 0; i < 8; i++) {
-			if (squares[i,7].GetPieceName() == "Pawn") {
+			if (squares[i,7].GetPieceName() == Names.Pawn) {
 				Active = false;
 				squares[i,7].RemovePiece();
 				PromotionFile = i;
 				var scene = GD.Load<PackedScene>("res://WhitePromotion.tscn");
 				var controls = (WhitePromotion)scene.Instance();
 				var parent = (GameSpace)GetParent();
+				float yOffset = parent.BoardOffset().y;
 				float width = parent.BoardWidth() / 8;
 				controls.RectPosition = 
-					new Vector2(width * i, 0);
+					new Vector2(width * i, yOffset);
 				controls.RectScale = new Vector2(0.9F, 0.9F);
 				AddChild(controls);
 				return;
 			}
-			else if (squares[i,0].GetPieceName() == "Pawn") {
+			else if (squares[i,0].GetPieceName() == Names.Pawn) {
 				Active = false;
 				squares[i,0].RemovePiece();
 				PromotionFile = i;
 				var scene = GD.Load<PackedScene>("res://BlackPromotion.tscn");
 				var controls = (BlackPromotion)scene.Instance();
 				var parent = (GameSpace)GetParent();
+				float yOffset = parent.BoardOffset().y;
 				float width = parent.BoardWidth() / 8;
 				controls.RectPosition = 
-					new Vector2(width * i, width * 4);
+					new Vector2(width * i, yOffset + width * 4);
 				controls.RectScale = new Vector2(0.9F, 0.9F);
 				AddChild(controls);
 				return;
@@ -388,7 +390,7 @@ public class Board : Node2D
 		Square kingSquare = null;
 		for (int i = 0; i < 8; i++) {
 			for (int j = 0; j < 8; j++) {
-				if (squares[i,j].GetPieceName() == "King" && squares[i,j].GetPieceColour() == col)
+				if (squares[i,j].GetPieceName() == Names.King && squares[i,j].GetPieceColour() == col)
 					kingSquare = squares[i,j];
 			}
 		}
@@ -409,8 +411,9 @@ public class Board : Node2D
 	private void OnWhitePromotion(string pieceName) {
 		squares[PromotionFile,7].RemovePiece();
 		squares[PromotionFile,7].BestowPiece(pieceName, 'w');
-		var menu = (VBoxContainer)GetChildren()[64];
-		((Node)GetChildren()[64]).QueueFree();
+			
+		var menu = (VBoxContainer)GetChildren()[GetChildCount() - 1];
+		((Node)GetChildren()[GetChildCount() - 1]).QueueFree();
 		Active = true;
 	}
 	

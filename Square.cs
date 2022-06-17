@@ -58,13 +58,13 @@ public class Square : Node2D {
 		}
 	}
 	
-	public string GetPieceName() {
+	public Names GetPieceName() {
 		try {
 			var piece = (Piece)GetChildren()[3];
-			return piece.GetType().ToString();
+			return piece.GetName();
 		}
 		catch (System.IndexOutOfRangeException e) {
-			return "empty";
+			return Names.None;
 		}
 	}
 	
@@ -83,6 +83,8 @@ public class Square : Node2D {
 	}
 	
 	public void BestowPiece(Names name, char colour) {
+		RemovePiece();
+		
 		string pieceName = null;
 		switch (name) {
 			case Names.Pawn:
@@ -119,11 +121,7 @@ public class Square : Node2D {
 	}
 	
 	public void BestowPiece(string name, char colour) {
-		try {
-			var pingus = (Node)GetChildren()[3];
-			RemoveChild(pingus);
-		}
-		catch (System.IndexOutOfRangeException) {}
+		RemovePiece();
 			
 		var Scene = GD.Load<PackedScene>("res://" + name + ".tscn");
 		var piece = (Piece)Scene.Instance();

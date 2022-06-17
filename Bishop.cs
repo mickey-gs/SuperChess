@@ -3,6 +3,10 @@ using System;
 using System.Collections.Generic;
 
 public class Bishop : Piece {
+	public Bishop() {
+		PieceName = Names.Bishop;
+	}
+	
 	public override void SetColour(char col) {
 		Colour = col;
 		var sprite = GetNode<Sprite>("Sprite");

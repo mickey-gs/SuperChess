@@ -3,8 +3,8 @@ using System;
 using System.Collections.Generic;
 
 public class Pawn : Piece {
-	public override string Greet() {
-		return $"I am a {Colour} pawn!";
+	public Pawn() {
+		PieceName = Names.Pawn;
 	}
 	
 	public override void SetColour(char col) {

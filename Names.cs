@@ -7,5 +7,6 @@ public enum Names {
 	Knight,
 	Rook,
 	Queen,
-	King
+	King,
+	None
 }

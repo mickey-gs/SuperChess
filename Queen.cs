@@ -3,6 +3,10 @@ using System;
 using System.Collections.Generic;
 
 public class Queen : Piece {
+	public Queen() {
+		PieceName = Names.Queen;
+	}
+	
 	public override void SetColour(char col) {
 		Colour = col;
 		var sprite = GetNode<Sprite>("Sprite");

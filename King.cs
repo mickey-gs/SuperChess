@@ -4,6 +4,10 @@ using System.Collections.Generic;
 
 public class King : Piece
 {
+	public King() {
+		PieceName = Names.King;
+	}
+	
 	public override void SetColour(char col) {
 		Colour = col;
 		var sprite = GetNode<Sprite>("Sprite");
@@ -13,9 +17,9 @@ public class King : Piece
 	public override List<Vector2> LegalMoves(Square[,] squares, Vector2 origin, Board board) {
 		var allDests = Moves(squares, origin, board);
 		for (int i = 0; i < allDests.Count; i++) {
-			string originPieceName = squares[(int)origin.x,(int)origin.y].GetPieceName();
+			Names originPieceName = squares[(int)origin.x,(int)origin.y].GetPieceName();
 			char originCol = squares[(int)origin.x,(int)origin.y].GetPieceColour();
-			string destPieceName = squares[(int)allDests[i].x,(int)allDests[i].y].GetPieceName();
+			Names destPieceName = squares[(int)allDests[i].x,(int)allDests[i].y].GetPieceName();
 			char destCol = squares[(int)allDests[i].x,(int)allDests[i].y].GetPieceColour();
 			squares[(int)allDests[i].x,(int)allDests[i].y].BestowPiece(originPieceName, originCol);
 			squares[(int)origin.x,(int)origin.y].RemovePiece();
