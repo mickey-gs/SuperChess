@@ -4,10 +4,15 @@ using System;
 public class WhitePromotion : VBoxContainer {
 	[Signal]
 	public delegate void Promotion(string pieceName);
+	[Signal]
+	public delegate void Appear();
 	
 	public override void _Ready() {
 		var parent = (Board)GetParent<Node2D>();
 		Connect(nameof(Promotion), parent, "OnWhitePromotion");
+		var root = (GameSpace)GetNode("/root/GameSpace");
+		Connect(nameof(Appear), root, "OnPromotionMenuAppearing");
+		EmitSignal(nameof(Appear));
 	}
 
 	private void _on_QueenBttn_pressed()

@@ -172,4 +172,8 @@ public class GameSpace : Area2D
 		}
 		ResetClocks();
 	}
+	
+	private void OnPromotionMenuAppearing() {
+		StopClocks();
+	}
 }

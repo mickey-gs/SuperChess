@@ -3,8 +3,8 @@ using System;
 using System.Collections.Generic;
 
 public class Knight : Piece {
-	public override string Greet() {
-		return "bananas~~";
+	public Knight() {
+		PieceName = Names.Knight;
 	}
 	
 	public override void SetColour(char col) {

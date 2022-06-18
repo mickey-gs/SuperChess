@@ -149,16 +149,18 @@ public class Board : Node2D
 		Square kingSquare = null;
 		for (int i = 0; i < 8; i++) {
 			for (int j = 0; j < 8; j++) {
-				if (squares[i,j].GetPieceName() == Names.King && squares[i,j].GetPieceColour() == col)
+				if (squares[i,j].GetPieceName() == Names.King && squares[i,j].GetPieceColour() == col) {
 					kingSquare = squares[i,j];
+				}
 			}
 		}
 		char enemyCol = (col == 'w' ? 'b' : 'w');
 		for (int i = 0; i < 8; i++) {
 			for (int j = 0; j < 8; j++) {
-				if (squares[i,j].GetPieceColour() != 'n' && 
-					((Piece)squares[i,j].GetChildren()[3]).Moves(squares, squares[i,j].Pos, EnPassantSq).Contains(kingSquare.Pos))
+				if (squares[i,j].GetPieceColour() != 'n' && squares[i,j].GetPieceColour() != col &&
+					((Piece)squares[i,j].GetChildren()[3]).Moves(squares, squares[i,j].Pos, this).Contains(kingSquare.Pos)) {
 					return true;
+				}
 			}
 		}
 		}
@@ -253,6 +255,9 @@ public class Board : Node2D
 				Origin = squares[file, rank];
 				var p = (Piece)squares[file, rank].GetChildren()[3];
 				squares[file, rank].Highlight();
+				foreach (var dest in p.LegalMoves(squares, new Vector2(file, rank), this)) {
+					GD.Print(dest);
+				}
 				foreach (var dest in p.LegalMoves(squares, new Vector2(file, rank), this)) {
 					squares[(int)dest.x, (int)dest.y].Highlight();
 				}
@@ -411,18 +416,19 @@ public class Board : Node2D
 	private void OnWhitePromotion(string pieceName) {
 		squares[PromotionFile,7].RemovePiece();
 		squares[PromotionFile,7].BestowPiece(pieceName, 'w');
-			
 		var menu = (VBoxContainer)GetChildren()[GetChildCount() - 1];
 		((Node)GetChildren()[GetChildCount() - 1]).QueueFree();
 		Active = true;
+		EmitSignal(nameof(TurnChange), Turn);
 	}
 	
 	private void OnBlackPromotion(string pieceName) {
 		squares[PromotionFile,0].RemovePiece();
 		squares[PromotionFile,0].BestowPiece(pieceName, 'b');
-		var menu = (VBoxContainer)GetChildren()[64];
-		((Node)GetChildren()[64]).QueueFree();
+		var menu = (VBoxContainer)GetChildren()[GetChildCount() - 1];
+		((Node)GetChildren()[GetChildCount() - 1]).QueueFree();
 		Active = true;
+		EmitSignal(nameof(TurnChange), Turn);
 	}
 	
 	private void _on_Square_input_event(object viewport, object @event, int shape_idx)

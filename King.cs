@@ -16,6 +16,13 @@ public class King : Piece
 	
 	public override List<Vector2> LegalMoves(Square[,] squares, Vector2 origin, Board board) {
 		var allDests = Moves(squares, origin, board);
+		int homeRank = (Colour == 'w' ? 0 : 7);
+		if (board.CastleKingside(this)) {
+			allDests.Add(new Vector2(6,homeRank));
+		}
+		if (board.CastleQueenside(this)) {
+			allDests.Add(new Vector2(2, homeRank));
+		}
 		for (int i = 0; i < allDests.Count; i++) {
 			Names originPieceName = squares[(int)origin.x,(int)origin.y].GetPieceName();
 			char originCol = squares[(int)origin.x,(int)origin.y].GetPieceColour();
@@ -28,12 +35,14 @@ public class King : Piece
 			if (destCol != 'n') {
 				squares[(int)allDests[i].x,(int)allDests[i].y].BestowPiece(destPieceName, destCol);
 			}
+			if (illegal) {
+				allDests[i] = new Vector2(-1,-1);
+			}
 			squares[(int)origin.x,(int)origin.y].BestowPiece(originPieceName, originCol);
-			if (illegal) 
-				allDests[i] = new Vector2(-1, -1);
 		}
 		
 		allDests.RemoveAll(sq => (int)sq.x == -1);
+		
 		return allDests;
 	}
 	
@@ -51,15 +60,6 @@ public class King : Piece
 				}
 			}
 		}
-		
-		int homeRank = (Colour == 'w' ? 0 : 7);
-		if (board.CastleKingside(this)) {
-			moves.Add(new Vector2(6,homeRank));
-		}
-		if (board.CastleQueenside(this)) {
-			moves.Add(new Vector2(2, homeRank));
-		}
-		
 		return moves;
 	}
 }
