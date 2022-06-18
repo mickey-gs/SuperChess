@@ -246,24 +246,22 @@ public class Board : Node2D
 		float width = parent.BoardWidth();
 		int file = (int)((position.x / width) * 8);
 		int rank = (int)((((offset + width) - position.y) / width) * 8);
+		Square destination = squares[file,rank];
 			
 		try {	
 			if (Origin == null) {
-				if (squares[file, rank].GetPieceColour() != Turn)
+				if (destination.GetPieceColour() != Turn)
 					return;
 				
-				Origin = squares[file, rank];
-				var p = (Piece)squares[file, rank].GetChildren()[3];
-				squares[file, rank].Highlight();
-				foreach (var dest in p.LegalMoves(squares, new Vector2(file, rank), this)) {
-					GD.Print(dest);
-				}
+				Origin = destination;
+				var p = (Piece)destination.GetChildren()[3];
+				destination.Highlight();
 				foreach (var dest in p.LegalMoves(squares, new Vector2(file, rank), this)) {
 					squares[(int)dest.x, (int)dest.y].Highlight();
 				}
 			}
 			else {
-				if (squares[file, rank].GetPieceColour() == Turn) {
+				if (destination.GetPieceColour() == Turn) {
 					HighlightMoves(file, rank);
 				}
 				else { 
@@ -312,34 +310,36 @@ public class Board : Node2D
 	}
 	
 	private void HandleMove(int file, int rank, Piece piece) {
+		Square destination = squares[file,rank];
+		
 		if (file == (int)EnPassantSq.x && rank == (int)EnPassantSq.y
 			&& Origin.GetPieceName() == Names.Pawn) {
 			squares[file, rank + (Turn == 'w' ? -1 : 1)].RemovePiece();
 		}
 		EnPassantSq = new Vector2(-1, -1);
-		squares[file, rank].BestowPiece(Origin.GetPieceName(), Turn);
+		destination.BestowPiece(Origin.GetPieceName(), Turn);
 		if (Origin.GetPieceName() == Names.Pawn && Math.Abs(Origin.Pos.y - rank) > 1)
 			EnPassantSq = new Vector2(file, rank + (Turn == 'w' ? -1 : 1));
 		Turn = (Turn == 'w' ? 'b' : 'w');
 		Origin.RemovePiece();
 		
-		if (squares[file, rank].GetPieceName() == Names.Pawn && Math.Abs(file - Origin.Pos.x) > 1) {
-			int kingRank = (squares[file, rank].GetPieceColour() == 'w' ? 0 : 7);
+		if (destination.GetPieceName() == Names.King && Math.Abs(file - Origin.Pos.x) > 1) {
+			int kingRank = (destination.GetPieceColour() == 'w' ? 0 : 7);
 			if (file == 2) {
 				squares[0,kingRank].RemovePiece();
-				squares[3,kingRank].BestowPiece("Rook", squares[file,rank].GetPieceColour());
+				squares[3,kingRank].BestowPiece("Rook", destination.GetPieceColour());
 			}
 			else {
 				squares[7,kingRank].RemovePiece();
-				squares[5,kingRank].BestowPiece("Rook", squares[file,rank].GetPieceColour());
+				squares[5,kingRank].BestowPiece("Rook", destination.GetPieceColour());
 			}
 		}
 		
-		if (squares[file,rank].GetPieceName() == Names.King) 
-			RemoveRights(squares[file,rank].GetPieceColour());
+		if (destination.GetPieceName() == Names.King) 
+			RemoveRights(destination.GetPieceColour());
 			
-		if (squares[file,rank].GetPieceName() == Names.Rook)
-			RemoveRights(squares[file,rank].GetPieceColour(), file);
+		if (destination.GetPieceName() == Names.Rook)
+			RemoveRights(destination.GetPieceColour(), file);
 	
 		EmitSignal(nameof(TurnChange), Turn);
 	}
