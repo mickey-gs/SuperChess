@@ -105,6 +105,7 @@ public class Board : Node2D
 		squares = toLoad.squares;
 		EnPassantSq = toLoad.EnPassantSq;
 		CastleRights = toLoad.CastleRights;
+		Active = true;
 		_Ready();
 	}
 	
@@ -196,7 +197,7 @@ public class Board : Node2D
 		if (LookForChecks(king.Colour)) 
 			return false;
 		if (king.Colour == 'w' && CastleRights[0]) {
-			for (int i = 3; i >= 1; i--) {
+			for (int i = 3; i > 1; i--) {
 				if (squares[i,0].GetPieceColour() != 'n' || 
 					AllAttacks('b').Contains(new Vector2(i,0))) {
 					return false;
@@ -267,7 +268,14 @@ public class Board : Node2D
 				else { 
 					var p = (Piece)Origin.GetChildren()[3];
 					if (p.LegalMoves(squares, Origin.Pos, this).Contains(new Vector2(file, rank))) {
+						Move move = new Move();
+						move.Origin = Origin; move.Dest = destination;
+						move.Capture = destination.GetPieceName() != Names.None;
 						HandleMove(file, rank, p);
+						move.Check = LookForChecks(Turn);
+						if (move.Check) 
+							move.Checkmate = LookForMate(Turn);
+						GD.Print(PGN.NotateMove(move));
 						CheckForEnd();
 						LookForPromotion();
 					}
@@ -346,7 +354,7 @@ public class Board : Node2D
 	
 	private void LookForPromotion() {
 		for (int i = 0; i < 8; i++) {
-			if (squares[i,7].GetPieceName() == Names.Pawn) {
+			if (squares[i,7].GetPieceName() == Names.Pawn && squares[i,7].GetPieceColour() == 'w') {
 				Active = false;
 				squares[i,7].RemovePiece();
 				PromotionFile = i;
@@ -361,7 +369,7 @@ public class Board : Node2D
 				AddChild(controls);
 				return;
 			}
-			else if (squares[i,0].GetPieceName() == Names.Pawn) {
+			else if (squares[i,0].GetPieceName() == Names.Pawn && squares[i,0].GetPieceColour() == 'b') {
 				Active = false;
 				squares[i,0].RemovePiece();
 				PromotionFile = i;
